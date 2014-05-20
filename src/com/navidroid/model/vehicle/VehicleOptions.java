@@ -12,7 +12,6 @@ public class VehicleOptions {
 	private Bitmap image;
 	private PointD imageAnchor = new PointD(0.5, 0.5); // TODO: Implement me.
 	private PointD screenAnchor = new PointD(0.5d, 0.75d);
-	private ILatLngVehicleMarkerFactory latLngVehicleMarkerFactory;
 	
 	public VehicleOptions location(LatLng location) {
 		this.location = location;
@@ -39,14 +38,5 @@ public class VehicleOptions {
 	
 	public PointD screenAnchor() {
 		return screenAnchor;
-	}
-	
-	public VehicleOptions latLngVehicleMarkerFactory(ILatLngVehicleMarkerFactory latLngVehicleMarkerFactory) {
-		this.latLngVehicleMarkerFactory = latLngVehicleMarkerFactory;
-		return this;
-	}
-	
-	public ILatLngVehicleMarkerFactory latLngVehicleMarkerFactory() {
-		return latLngVehicleMarkerFactory;
 	}
 }

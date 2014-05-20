@@ -16,7 +16,7 @@ import com.navidroid.model.map.NavigationMap;
 import com.navidroid.model.map.IMap.OnUpdate;
 import com.navidroid.model.util.LayoutUtil;
 
-public class StaticVehicleMarker implements IVehicleMarker {
+public class StaticVehicleMarker {
 	
 	private Vehicle vehicle;
 	private IMap map;
@@ -48,7 +48,6 @@ public class StaticVehicleMarker implements IVehicleMarker {
 		setLayoutParams(map.getTilt());
 	}
 
-	@Override
 	public void show() {
 		if (!isVisible) {
 			isVisible = true;
@@ -57,7 +56,6 @@ public class StaticVehicleMarker implements IVehicleMarker {
 		}
 	}
 
-	@Override
 	public void hide() {
 		if (isVisible) {
 			isVisible = false;

@@ -10,7 +10,6 @@ public class NavigationOptions {
 	private VehicleOptions vehicleOptions = new VehicleOptions();
 	private MapOptions mapOptions = new MapOptions();
 	private GpsOptions gpsOptions = new GpsOptions();
-	private IDirectionsFactory directionsFactory;
 	
 	public NavigationOptions vehicleOptions(VehicleOptions options) {
 		vehicleOptions = options;
@@ -37,14 +36,5 @@ public class NavigationOptions {
 	
 	public GpsOptions gpsOptions() {
 		return gpsOptions;
-	}
-	
-	public NavigationOptions directionsFactory(IDirectionsFactory directionsFactory) {
-		this.directionsFactory = directionsFactory;
-		return this;
-	}
-	
-	public IDirectionsFactory directionsFactory() {
-		return directionsFactory;
 	}
 }

@@ -8,7 +8,9 @@ import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallback
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationClient;
 import com.navidroid.R;
+import com.navidroid.model.directions.IDirectionsFactory;
 import com.navidroid.model.map.IMap;
+import com.navidroid.model.map.IMapFactory;
 import com.navidroid.model.map.NavigationMap;
 import com.navidroid.model.navigation.DefaultNavigatorStateListener;
 import com.navidroid.model.navigation.INavigatorStateListener;
@@ -18,6 +20,7 @@ import com.navidroid.model.navigation.Navigator;
 import com.navidroid.model.positioning.GpsFactory;
 import com.navidroid.model.positioning.IGps;
 import com.navidroid.model.positioning.GpsOptions.GpsType;
+import com.navidroid.model.vehicle.IVehicleMarkerFactory;
 import com.navidroid.model.vehicle.Vehicle;
 
 import android.app.Activity;
@@ -34,9 +37,45 @@ public class NavigationFragment extends Fragment implements
 	
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	
+	private static List<IDirectionsFactory> directionsFactorysById = new ArrayList<IDirectionsFactory>();
+	private static List<IMapFactory> mapFactorysById = new ArrayList<IMapFactory>();
+	private static List<IVehicleMarkerFactory> vehicleMarkerFactorysById = new ArrayList<IVehicleMarkerFactory>();
+	private static List<NavigationOptions> optionsById = new ArrayList<NavigationOptions>();
+	
+	public static final NavigationFragment newInstance(
+			IDirectionsFactory directionsFactory,
+			IMapFactory mapFactory,
+			IVehicleMarkerFactory vehicleMarkerFactory) {
+		return newInstance(directionsFactory, mapFactory, vehicleMarkerFactory, null);
+	}
+	
+	public static final NavigationFragment newInstance(
+			IDirectionsFactory directionsFactory,
+			IMapFactory mapFactory,
+			IVehicleMarkerFactory vehicleMarkerFactory,
+			NavigationOptions options) {
+		
+		NavigationFragment fragment = new NavigationFragment();
+		int id = directionsFactorysById.size();
+		
+		directionsFactorysById.add(id, directionsFactory);
+		mapFactorysById.add(id, mapFactory);
+		vehicleMarkerFactorysById.add(id, vehicleMarkerFactory);
+		optionsById.add(id, options);
+		
+		Bundle args = new Bundle();
+		args.putInt("index", id);
+		fragment.setArguments(args);
+		return fragment;
+	}
+	
 	private Navigator navigator = new Navigator();
-
+	
+	private IDirectionsFactory directionsFactory;
+	private IMapFactory mapFactory;
+	private IVehicleMarkerFactory vehicleMarkerFactory;
 	private NavigationOptions options;
+	
 	private InternalNavigator internalNavigator;
 	private Activity parent;
 	private LocationClient locationClient;
@@ -44,21 +83,12 @@ public class NavigationFragment extends Fragment implements
 	private Vehicle vehicle;
 	private IGps gps;
 	
-	private static List<NavigationOptions> optionsById = new ArrayList<NavigationOptions>();
-	
-	public static final NavigationFragment newInstance(NavigationOptions options) {
-		NavigationFragment fragment = new NavigationFragment();
-		int id = optionsById.size();
-		optionsById.add(id, options);
-		Bundle args = new Bundle();
-		args.putInt("index", id);
-		fragment.setArguments(args);
-		return fragment;
-	}
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		int id = getArguments().getInt("index");
+		directionsFactory = directionsFactorysById.get(id);
+		mapFactory = mapFactorysById.get(id);
+		vehicleMarkerFactory = vehicleMarkerFactorysById.get(id);
 		options = optionsById.get(id);
 		super.onCreate(savedInstanceState);
 	}
@@ -70,7 +100,7 @@ public class NavigationFragment extends Fragment implements
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		IMap map = options.mapOptions().mapFactory().createMap(this);
+		IMap map = mapFactory.createMap(this);
 		navigationMap = new NavigationMap(map, options.mapOptions());
 		
 		if (options.gpsOptions().gpsType() == GpsType.REAL) {
@@ -114,8 +144,8 @@ public class NavigationFragment extends Fragment implements
 	}
 	
 	private void createNavigator() {
-		vehicle = new Vehicle(this, navigationMap, options.vehicleOptions().location(gps.getLastLocation()));
-		internalNavigator = new InternalNavigator(this, gps, navigationMap, vehicle, options.directionsFactory());
+		vehicle = new Vehicle(this, vehicleMarkerFactory, navigationMap, options.vehicleOptions().location(gps.getLastLocation()));
+		internalNavigator = new InternalNavigator(this, gps, navigationMap, vehicle, directionsFactory);
 		INavigatorStateListener stateListener = new DefaultNavigatorStateListener(this);
 		internalNavigator.setNavigatorStateListener(stateListener);
 		navigator.setInternalNavigator(internalNavigator);

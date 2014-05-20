@@ -31,19 +31,19 @@ public class Vehicle {
 	private LatLng location;
 	private double bearing;
 	
-	private ILatLngVehicleMarker latLngMarker;
+	private IVehicleMarker latLngMarker;
 	private StaticVehicleMarker overlayMarker;
 	
 	private Object targetPositionsLock = new Object();
 		
-	public Vehicle(NavigationFragment navigationFragment, NavigationMap navigationMap, VehicleOptions options) {
+	public Vehicle(NavigationFragment navigationFragment, IVehicleMarkerFactory factory, NavigationMap navigationMap, VehicleOptions options) {
 		this.navigationMap = navigationMap;
 		location = options.location();
 		image = options.image();
 		setScreenAnchor(options.screenAnchor());
 		targetPositions = new ArrayList<Position>();
 		
-		latLngMarker = options.latLngVehicleMarkerFactory().createLatLngVehicleMarker(this, navigationMap);
+		latLngMarker = factory.createVehicleMarker(this, navigationMap);
 		overlayMarker = new StaticVehicleMarker(navigationFragment, this, navigationMap);
 		listenForMapModeChange();
 		onMapModeChanged(navigationMap.getMapMode());
