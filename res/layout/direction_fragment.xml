@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:columnCount="3" >
+
+    <ImageView
+        android:id="@+id/direction_image"
+        android:layout_column="0"
+        android:layout_row="0"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="@+id/direction_image" />
+
+    <TextView
+        android:id="@+id/distance_to_direction"
+        android:layout_column="0"
+        android:layout_row="1"
+        android:layout_gravity="fill"
+        android:gravity="center_horizontal"
+        android:textColor="#FFFFFFFF"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:includeFontPadding="false"/>
+
+    <View
+        android:id="@+id/direction_divider"
+        android:layout_width="2dp"
+        android:layout_height="match_parent"
+        android:layout_column="1"
+        android:layout_marginBottom="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_row="0"
+        android:layout_rowSpan="2"
+        android:background="#FFFFFFFF"
+        android:gravity="fill" />
+    
+    <LinearLayout
+        android:id="@+id/direction_description_fragment_placeholder"
+        android:layout_width="match_parent"
+    	android:layout_height="match_parent"
+    	android:layout_margin="10dp"
+    	android:layout_row="0"
+        android:layout_rowSpan="2" />    
+
+    <!--com.droidnav.FontFitTextView
+        android:id="@+id/direction_description_text"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_column="2"
+        android:layout_row="0"
+        android:layout_rowSpan="2"
+        android:layout_gravity="fill"
+        android:maxLines="2"
+        android:lines="2"
+        android:textAlignment="gravity"
+        android:textSize="42sp"
+        android:textColor="#FFFFFFFF"
+        android:textStyle="bold" /-->
+    
+</GridLayout>

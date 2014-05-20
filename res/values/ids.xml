@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <item name="fragment_layout" type="id" />
+    
+    <item name="map_container" type="id" />
+    <item name="map_overlay_container" type="id" />
+    <item name="map_fragment" type="id" />
+    <item name="directions_fragment" type="id" />
+    <item name="navigation_fragment" type="id" />
+    <item name="map_events_listener_view" type="id" />
+    <item name="navigation_activity_navigation_fragment" type="id" />
+    <item name="demo_navigation_fragment_container" type="id" />
+    <item name="demo_navigation_fragment" type="id" />
+    
+    <item name="direction_image" type="id" />
+    <item name="distance_to_direction" type="id" />
+    <item name="direction_text" type="id" />
+    <item name="direction_divider" type="id" />
+    <item name="direction_fragment_container" type="id" />
+    <item name="directions_overlay_container" type="id" />
+    <item name="direction_description_fragment_placeholder" type="id" />
+    <item name="direction_description_fragment" type="id" />
+    
+    <item name="static_vehicle_marker" type="id" />
+    <item name="static_vehicle_marker_container" type="id" />
+</resources>
