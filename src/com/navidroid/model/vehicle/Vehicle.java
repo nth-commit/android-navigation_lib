@@ -45,10 +45,19 @@ public class Vehicle {
 		
 		latLngMarker = factory.createVehicleMarker(this, navigationMap);
 		overlayMarker = new StaticVehicleMarker(navigationFragment, this, navigationMap);
-		listenForMapModeChange();
-		onMapModeChanged(navigationMap.getMapMode());
+		navigationMap.setVehicle(this);
 		
 		startUpdateTask();
+	}
+	
+	public void signalFollowing() {
+		latLngMarker.hide();
+		overlayMarker.show();
+	}
+	
+	public void signalNotFollowing() {
+		overlayMarker.hide();
+		latLngMarker.show();
 	}
 	
 	private void startUpdateTask() {
@@ -83,25 +92,6 @@ public class Vehicle {
 			
 		};
 		AsyncTaskExecutor.execute(vehicleUpdateTask);
-	}
-	
-	private void listenForMapModeChange() {
-		navigationMap.setOnMapModeChangedListener(new OnMapModeChangedListener() {
-			@Override
-			public void invoke(MapMode mode) {
-				onMapModeChanged(mode);			
-			}
-		});
-	}
-	
-	private void onMapModeChanged(MapMode mode) {
-		if (mode == MapMode.FOLLOW) {
-			latLngMarker.hide();
-			overlayMarker.show();
-		} else {
-			overlayMarker.hide();
-			latLngMarker.show();
-		}
 	}
 	
 	public void setPosition(Position position) {

@@ -3,7 +3,6 @@
     <item name="fragment_layout" type="id" />
     
     <item name="map_container" type="id" />
-    <item name="map_overlay_container" type="id" />
     <item name="map_fragment" type="id" />
     <item name="directions_fragment" type="id" />
     <item name="navigation_fragment" type="id" />

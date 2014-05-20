@@ -15,6 +15,10 @@ public interface IMap {
 		void invoke();
 	}
 	
+	public interface OnInvalidationAnimationFinished {
+		void invoke();
+	}
+	
 	public void setLocation(LatLng location);
 	
 	public void setBearing(double bearing);
@@ -44,6 +48,8 @@ public interface IMap {
 	public void invalidate();
 	
 	public void invalidate(int animationTime);
+	
+	public void invalidate(int animationTime, OnInvalidationAnimationFinished invalidationAnimationFinished);
 	
 	public void addPolyline(PolylineOptions options);
 	

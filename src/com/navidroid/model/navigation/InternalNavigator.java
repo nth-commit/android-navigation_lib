@@ -98,7 +98,7 @@ public class InternalNavigator {
 			destination = null;
 			navigationState = null;
 			lastNavigationState = null;
-			map.setMapMode(MapMode.FREE);
+			vehicle.signalNotFollowing();
 			map.removePolylinePath();
 		}
 	}
@@ -118,7 +118,7 @@ public class InternalNavigator {
 	private void beginNavigation(Directions directions, LatLng location) {
 		synchronized (navigatingLock) {
 			redirectNavigation(directions, location);
-			map.setMapMode(MapMode.FOLLOW);
+			map.followVehicle();
 			if (gps instanceof AbstractSimulatedGps) {
 				((AbstractSimulatedGps)gps).followPath(directions.getLatLngPath());
 			}

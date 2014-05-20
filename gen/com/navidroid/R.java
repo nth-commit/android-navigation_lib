@@ -216,30 +216,29 @@ containing a value of this type.
         public static int turn_right_87ceeb=0x7f020021;
     }
     public static final class id {
-        public static int demo_navigation_fragment=0x7f05000e;
-        public static int demo_navigation_fragment_container=0x7f05000d;
-        public static int direction_description_fragment=0x7f050016;
-        public static int direction_description_fragment_placeholder=0x7f050015;
-        public static int direction_divider=0x7f050012;
-        public static int direction_fragment_container=0x7f050013;
-        public static int direction_image=0x7f05000f;
-        public static int direction_text=0x7f050011;
-        public static int directions_fragment=0x7f050009;
-        public static int directions_overlay_container=0x7f050014;
-        public static int distance_to_direction=0x7f050010;
+        public static int demo_navigation_fragment=0x7f05000d;
+        public static int demo_navigation_fragment_container=0x7f05000c;
+        public static int direction_description_fragment=0x7f050015;
+        public static int direction_description_fragment_placeholder=0x7f050014;
+        public static int direction_divider=0x7f050011;
+        public static int direction_fragment_container=0x7f050012;
+        public static int direction_image=0x7f05000e;
+        public static int direction_text=0x7f050010;
+        public static int directions_fragment=0x7f050008;
+        public static int directions_overlay_container=0x7f050013;
+        public static int distance_to_direction=0x7f05000f;
         public static int fragment_layout=0x7f050005;
         public static int hybrid=0x7f050004;
         public static int map_container=0x7f050006;
-        public static int map_events_listener_view=0x7f05000b;
-        public static int map_fragment=0x7f050008;
-        public static int map_overlay_container=0x7f050007;
-        public static int navigation_activity_navigation_fragment=0x7f05000c;
-        public static int navigation_fragment=0x7f05000a;
+        public static int map_events_listener_view=0x7f05000a;
+        public static int map_fragment=0x7f050007;
+        public static int navigation_activity_navigation_fragment=0x7f05000b;
+        public static int navigation_fragment=0x7f050009;
         public static int none=0x7f050000;
         public static int normal=0x7f050001;
         public static int satellite=0x7f050002;
-        public static int static_vehicle_marker=0x7f050017;
-        public static int static_vehicle_marker_container=0x7f050018;
+        public static int static_vehicle_marker=0x7f050016;
+        public static int static_vehicle_marker_container=0x7f050017;
         public static int terrain=0x7f050003;
     }
     public static final class integer {
