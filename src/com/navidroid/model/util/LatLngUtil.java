@@ -1,5 +1,7 @@
 package com.navidroid.model.util;
 
+import java.util.List;
+
 import android.location.Location;
 
 import com.navidroid.model.LatLng;
@@ -31,6 +33,14 @@ public class LatLngUtil {
             double a = Math.sin(dLatR / 2) * Math.sin(dLatR / 2) + Math.cos(lat1R) * Math.cos(lat2R)
                             * Math.sin(dLngR / 2) * Math.sin(dLngR / 2);
             return 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+    
+    public static double distanceInMeters(List<LatLng> path) {
+    	double distance = 0;
+    	for (int i = 0; i < path.size() - 1; i++) {
+    		distance += distanceInMeters(path.get(i), path.get(i + 1));
+    	}
+    	return distance;
     }
 
     public static double initialBearing(LatLng start, LatLng end) {

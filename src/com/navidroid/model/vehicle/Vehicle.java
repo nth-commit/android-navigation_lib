@@ -17,35 +17,25 @@ import com.navidroid.model.util.ListUtil.Predicate;
 
 public class Vehicle {
 	
-	private static final int TARGET_FRAMES_PER_S = 20;
-	private static final int MS_PER_FRAME = 1000 / TARGET_FRAMES_PER_S;
-	private static final int GPS_DELAY_MS = 500;
-	
 	private Bitmap image;
 	private PointD screenAnchor;
 	private NavigationMap navigationMap;
-	
-	private ArrayList<Position> targetPositions;
 	private LatLng location;
 	private double bearing;
 	
 	private IVehicleMarker latLngMarker;
 	private StaticVehicleMarker overlayMarker;
-	
-	private Object targetPositionsLock = new Object();
+
 		
 	public Vehicle(NavigationFragment navigationFragment, IVehicleMarkerFactory factory, NavigationMap navigationMap, VehicleOptions options) {
 		this.navigationMap = navigationMap;
 		location = options.location();
 		image = options.image();
 		setScreenAnchor(options.screenAnchor());
-		targetPositions = new ArrayList<Position>();
 		
 		latLngMarker = factory.createVehicleMarker(this, navigationMap);
 		overlayMarker = new StaticVehicleMarker(navigationFragment, this, navigationMap);
 		navigationMap.setVehicle(this);
-		
-		startUpdateTask();
 	}
 	
 	public void signalFollowing() {
@@ -58,93 +48,12 @@ public class Vehicle {
 		latLngMarker.show();
 	}
 	
-	private void startUpdateTask() {
-		AsyncTask<Void, Void, Void> vehicleUpdateTask = new AsyncTask<Void, Void, Void>() {
-			@Override
-			protected Void doInBackground(Void... arg0) {
-				while (true) {
-					long timeDelayed;
-					Position[] positions;
-					synchronized (targetPositionsLock) {
-						timeDelayed = System.currentTimeMillis() - GPS_DELAY_MS;
-						positions = getPositionsAroundTime(timeDelayed);
-					}
-					
-					calculateLocation(timeDelayed, positions[0], positions[1]);
-					calculateBearing(timeDelayed, positions[0], positions[1]);
-					publishProgress();
-					try {
-						Thread.sleep(MS_PER_FRAME); // TODO: adjust sleep time based on real processing time.
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-			
-			@Override
-			protected void onProgressUpdate(Void... values) {
-				navigationMap.setVehiclePosition(location, bearing);
-				latLngMarker.setBearing(bearing);
-				latLngMarker.setLocation(location);
-			}
-			
-		};
-		AsyncTaskExecutor.execute(vehicleUpdateTask);
-	}
-	
-	public void setPosition(Position position) {
-		synchronized (targetPositionsLock) {
-			targetPositions.add(position);
-		}
-	}
-	
-	private Position[] getPositionsAroundTime(final long time) {
-		Position[] currentPositions = new Position[2];
-		synchronized (targetPositionsLock) {
-			int startIndex = ListUtil.lastIndexOf(targetPositions, new Predicate<Position>() {
-				@Override
-				public boolean check(Position item, int index) {
-					return item.timestamp <= time;
-				}
-			});
-			
-			if (targetPositions.size() > startIndex && startIndex > -1) {
-				currentPositions[0] = targetPositions.get(startIndex);
-				currentPositions[1] = ListUtil.find(targetPositions, new Predicate<Position>() {
-					@Override
-					public boolean check(Position item, int index) {
-						return item.timestamp > time;
-					}
-				});
-			}
-			
-			for (int i = 0; i < startIndex && i < targetPositions.size(); i++) {
-				targetPositions.remove(i);
-			}
-			targetPositions.trimToSize();
-		}
-		return currentPositions;
-	}
-	
-	private void calculateLocation(long time, Position a, Position b) {
-		if (a != null) {
-			if (b == null) {
-				location = a.location;
-			} else {
-				double deltaDist = LatLngUtil.distanceInMeters(a.location, b.location);
-				double deltaTime = b.timestamp - a.timestamp;
-				double timeFromA = time - a.timestamp;
-				double interpolationFactor = MathUtil.clamp(timeFromA / deltaTime, 0, 1);
-				double distFromA = deltaDist * interpolationFactor;
-				location = LatLngUtil.travel(a.location, a.bearing, distFromA);
-			}
-		}
-	}
-	
-	private void calculateBearing(long time, Position a, Position b) {
-		if (a != null) {
-			bearing = a.bearing;
-		}
+	public void setVehiclePosition(LatLng location, double bearing) {
+		this.location = location;
+		this.bearing = bearing;
+		latLngMarker.setLocation(location);
+		latLngMarker.setBearing(bearing);
+		navigationMap.setVehiclePosition(location, bearing);
 	}
 	
 	public LatLng getLocation() {

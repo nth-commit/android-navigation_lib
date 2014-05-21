@@ -9,7 +9,7 @@ import com.navidroid.model.vehicle.Vehicle;
 
 public class NavigationMap {
 
-	private static final int FOLLOW_VEHICLE_ANIMATION_TIME = 1000;
+	private static final int FOLLOW_VEHICLE_ANIMATION_TIME = 500;
 	private static final float NAVIGATING_TILT = 60;
 	private static final float NAVIGATING_ZOOM = 19;
 
@@ -70,8 +70,8 @@ public class NavigationMap {
 		vehicleBearing = bearing;
 		
 		if (trackLocation) {
-			map.setLocation(location);
 			map.setBearing(bearing);
+			map.setLocation(location);
 			map.invalidate();
 		}
 	}

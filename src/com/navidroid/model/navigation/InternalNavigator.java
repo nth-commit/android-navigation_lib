@@ -13,6 +13,7 @@ import com.navidroid.model.positioning.Position;
 import com.navidroid.model.positioning.IGps.OnTickHandler;
 import com.navidroid.model.util.LatLngUtil;
 import com.navidroid.model.vehicle.Vehicle;
+import com.navidroid.model.vehicle.VehicleSmoother;
 
 public class InternalNavigator {
 	
@@ -23,6 +24,7 @@ public class InternalNavigator {
 	
 	private NavigationMap map;
 	private Vehicle vehicle;
+	private VehicleSmoother vehicleSmoother;
 	private IGps gps;
 	private IDirectionsFactory directionsFactory;
 	private INavigatorStateListener navigatorStateListener;
@@ -39,8 +41,11 @@ public class InternalNavigator {
 		this.map = map;
 		this.vehicle = vehicle;
 		this.directionsFactory = directionsFactory;
+		
+		vehicleSmoother = new VehicleSmoother(vehicle);
 		navigationState = new MutableNavigationState();
 		navigationStateSnapshot = navigationState.getSnapshot();
+		
 		listenToGps();
 	}
 	
@@ -145,7 +150,7 @@ public class InternalNavigator {
 				navigatorStateListener.OnNavigatorTick(navigationState);
 			}
 		}
-		updateVehicleMarker();
+		vehicleSmoother.update(navigationStateSnapshot);
 	}
 	
 	private void checkArrival() {
@@ -185,17 +190,6 @@ public class InternalNavigator {
 				navigationState.signalOnPath();
 			}
 			
-		}
-	}
-	
-	private void updateVehicleMarker() {
-		if (isNavigating()) {
-			long timestamp = navigationState.getTime();
-			vehicle.setPosition(navigationState.isOnPath() ?
-					new Position(navigationState.getLocationOnPath(), navigationState.getBearingOnPath(), timestamp) :
-					new Position(navigationState.getLocation(), navigationState.getBearing(), timestamp));
-		} else {
-			vehicle.setPosition(position);
 		}
 	}
 }
