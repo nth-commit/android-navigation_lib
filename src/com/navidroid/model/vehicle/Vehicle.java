@@ -8,8 +8,6 @@ import com.navidroid.NavigationFragment;
 import com.navidroid.model.LatLng;
 import com.navidroid.model.PointD;
 import com.navidroid.model.map.NavigationMap;
-import com.navidroid.model.map.NavigationMap.MapMode;
-import com.navidroid.model.map.NavigationMap.OnMapModeChangedListener;
 import com.navidroid.model.positioning.Position;
 import com.navidroid.model.util.AsyncTaskExecutor;
 import com.navidroid.model.util.LatLngUtil;

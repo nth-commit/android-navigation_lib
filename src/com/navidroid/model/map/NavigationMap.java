@@ -8,16 +8,7 @@ import com.navidroid.model.map.IMap.OnTouchEventHandler;
 import com.navidroid.model.vehicle.Vehicle;
 
 public class NavigationMap {
-	
-	public interface OnMapModeChangedListener {
-		void invoke(MapMode mode);
-	}
-	
-	public enum MapMode {
-		FOLLOW,
-		FREE
-	}
-	
+
 	private static final int FOLLOW_VEHICLE_ANIMATION_TIME = 1000;
 	private static final float NAVIGATING_TILT = 60;
 	private static final float NAVIGATING_ZOOM = 19;
@@ -26,10 +17,6 @@ public class NavigationMap {
 	private Vehicle vehicle;
 	private LatLng vehicleLocation;
 	private double vehicleBearing;
-	private MapMode mapMode;
-	
-	private OnMapModeChangedListener mapModeChangedListener;
-	
 	private boolean trackLocation = true;
 	
 	public NavigationMap(IMap map, MapOptions options) {
@@ -73,7 +60,7 @@ public class NavigationMap {
 		map.invalidate(FOLLOW_VEHICLE_ANIMATION_TIME, new OnInvalidationAnimationFinished() {
 			@Override
 			public void invoke() {
-				vehicle.signalFollowing();				
+				vehicle.signalFollowing();
 			}
 		});
 	}
