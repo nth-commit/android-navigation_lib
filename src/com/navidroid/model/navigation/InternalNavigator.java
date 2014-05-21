@@ -1,25 +1,18 @@
 package com.navidroid.model.navigation;
 
-import java.io.InvalidObjectException;
-
 import com.navidroid.NavigationFragment;
 import com.navidroid.model.LatLng;
-import com.navidroid.model.directions.Direction;
 import com.navidroid.model.directions.Directions;
 import com.navidroid.model.directions.IDirectionsFactory;
-import com.navidroid.model.directions.Point;
 import com.navidroid.model.directions.Route;
 import com.navidroid.model.directions.Route.DirectionsRetrieved;
 import com.navidroid.model.map.NavigationMap;
-import com.navidroid.model.map.NavigationMap.MapMode;
 import com.navidroid.model.positioning.AbstractSimulatedGps;
 import com.navidroid.model.positioning.IGps;
 import com.navidroid.model.positioning.Position;
 import com.navidroid.model.positioning.IGps.OnTickHandler;
 import com.navidroid.model.util.LatLngUtil;
 import com.navidroid.model.vehicle.Vehicle;
-
-import android.util.Log;
 
 public class InternalNavigator {
 	
@@ -34,8 +27,9 @@ public class InternalNavigator {
 	private IDirectionsFactory directionsFactory;
 	private INavigatorStateListener navigatorStateListener;
 	private Position position;
-	private NavigationState navigationState;
-	private NavigationState lastNavigationState;
+	private MutableNavigationState navigationState;
+	private NavigationState navigationStateSnapshot;
+	private NavigationState lastNavigationStateSnapshot;
 	private LatLng destination;
 	
 	private final Object navigatingLock = new Object();
@@ -45,6 +39,8 @@ public class InternalNavigator {
 		this.map = map;
 		this.vehicle = vehicle;
 		this.directionsFactory = directionsFactory;
+		navigationState = new MutableNavigationState();
+		navigationStateSnapshot = navigationState.getSnapshot();
 		listenToGps();
 	}
 	
@@ -96,8 +92,7 @@ public class InternalNavigator {
 	public void stop() {
 		synchronized (navigatingLock) {
 			destination = null;
-			navigationState = null;
-			lastNavigationState = null;
+			navigationState.endNavigation();
 			vehicle.signalNotFollowing();
 			map.removePolylinePath();
 		}
@@ -105,7 +100,7 @@ public class InternalNavigator {
 	
 	public boolean isNavigating() {
 		synchronized (navigatingLock) {
-			return navigationState != null;
+			return navigationState.isNavigating();
 		}
 	}
 	
@@ -128,7 +123,7 @@ public class InternalNavigator {
 	
 	private void redirectNavigation(Directions directions, LatLng location) {
 		synchronized (navigatingLock) {
-			navigationState = new NavigationState(directions);
+			navigationState.startNavigation(directions);
 			destination = location;
 			map.addPathPolyline(directions.getLatLngPath());
 		}
@@ -137,17 +132,17 @@ public class InternalNavigator {
 	private void onGpsTick(Position position) {
 		synchronized (navigatingLock) {
 			this.position = position;
+			navigationState.update(position);
+			lastNavigationStateSnapshot = navigationStateSnapshot;
+			navigationStateSnapshot = navigationState.getSnapshot();
 			if (isNavigating()) {
-				try {
-					navigationState.update(position);
-				} catch (InvalidObjectException e) {
-					e.printStackTrace();
-					Log.e("Fatal exception in Navigator", e.getMessage());
-				}
 				checkArrival();
 				checkDirectionChanged();
 				checkOffPath();
-				tickNavigator();
+			}
+			
+			if (navigatorStateListener != null) {
+				navigatorStateListener.OnNavigatorTick(navigationState);
 			}
 		}
 		updateVehicleMarker();
@@ -161,50 +156,36 @@ public class InternalNavigator {
 	}
 	
 	private void checkDirectionChanged() {
-		if (!isNavigating()) {
-			return;
-		}
-		
-		Point currentPoint = navigationState.getCurrentPoint();
-		if (lastNavigationState == null) {
-			navigatorStateListener.OnNewDirection(navigationState);
-		} else {
-			Point lastPoint = lastNavigationState.getCurrentPoint();
-			if (currentPoint != lastPoint) {
-				Direction currentDirection = currentPoint.nextDirection;
-				if (currentDirection != lastPoint.nextDirection) {
-					navigatorStateListener.OnNewDirection(navigationState);
-				}
+		if (navigationStateSnapshot.isNavigating()) {
+			if (!lastNavigationStateSnapshot.isNavigating()) {
+				navigatorStateListener.OnNewDirection(navigationStateSnapshot);
+			} else if (navigationStateSnapshot.getCurrentPoint().direction != lastNavigationStateSnapshot.getCurrentPoint().direction) {
+				navigatorStateListener.OnNewDirection(navigationStateSnapshot);
 			}
 		}
 	}
 	
 	private void checkOffPath() {
-		if (!isNavigating() || !navigationState.isOnPath()) {
-			return;
-		}
-		
-		if (navigationState.getDistanceOffPath() > OFF_PATH_TOLERANCE_METERS ||
-				navigationState.getBearingDifferenceFromPath() > OFF_PATH_TOLERANCE_BEARING) {
-			
-			if (lastNavigationState != null && !lastNavigationState.isHeadingOffPath()) {
-				navigationState.signalHeadingOffPath();
-			} else if (navigationState.getTime() - navigationState.getHeadingOffPathStartTime() > MAX_TIME_OFF_PATH_MS) {
-				navigationState.signalOffPath();
-				navigatorStateListener.OnVehicleOffPath(navigationState);
+		if (navigationStateSnapshot.isNavigating()) {
+			if (navigationStateSnapshot.getDistanceOffPath() > OFF_PATH_TOLERANCE_METERS ||
+				navigationStateSnapshot.getBearingDifferenceFromPath() > OFF_PATH_TOLERANCE_BEARING) {
+				
+				if (lastNavigationStateSnapshot.isNavigating() && !lastNavigationStateSnapshot.isHeadingOffPath()) {
+					// Last time we checked, we were navigating but not heading off path.
+					navigationState.signalHeadingOffPath();
+				} else if (navigationStateSnapshot.isOnPath() &&
+					navigationStateSnapshot.getTime() - navigationStateSnapshot.getHeadingOffPathStartTime() > MAX_TIME_OFF_PATH_MS) {
+					// We have been off path for the tolerance time and not yet signalled so.
+					
+					navigationState.signalOffPath();
+					navigatorStateListener.OnVehicleOffPath(navigationState);
+				}
+				
+			} else { // We are back on path.
+				navigationState.signalOnPath();
 			}
-		} else {
-			navigationState.signalOnPath();
+			
 		}
-	}
-	
-	private void tickNavigator() {
-		if (!isNavigating()) {
-			return;
-		}
-		
-		lastNavigationState = navigationState.snapshot();
-		navigatorStateListener.OnNavigatorTick(navigationState);
 	}
 	
 	private void updateVehicleMarker() {

@@ -77,7 +77,9 @@ public class DefaultNavigatorStateListener implements INavigatorStateListener {
 	}
 	
 	public void OnNavigatorTick(NavigationState state) {
-		currentDirectionFragment.setDirectionDistance(state.getDistanceToCurrentDirection());
+		if (currentDirectionFragment != null) {
+			currentDirectionFragment.setDirectionDistance(state.getDistanceToCurrentDirection());
+		}
 	}
 	
 	private void addDirectionsOverlay() {
