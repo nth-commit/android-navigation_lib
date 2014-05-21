@@ -11,8 +11,10 @@ Usage
 -----
 It is easy to get access to the Navigator object, simply create a NavigationFragment and call getNavigator(). Note that NavigationFragment.getNavigator() and operations on the Navigator itself can be called anytime in the fragment lifecycle, but navigation will only start once the view has been created and GPS signal found.
 ```java
-NavigationOptions options = new NavigationOptions(); // Some options are mandatory, see below.
-NavigationFragment myNavigationFragment = NavigationFragment.newInstance(options);
+NavigationFragment myNavigationFragment = NavigationFragment.newInstance(
+  directionsFactory \** Implement IDirectionsFactory **\,
+  mapFactory \** Implement IMapFactory **\,
+  vehicleMarkerFactory \** Implement IVehicleMarkerFactory **\);
 FragmentTransaction ft = getFragmentManager().beginTransaction();
 ft.add(R.id.demo_nav_fragment_container, navigationFragment);
 ft.commit();
@@ -21,11 +23,7 @@ Navigator navigator = myNavigationFragment.getNavigator()
 navigator.go(new LatLng(-43.529333, 172.587279)); // Start navigating to this location!
 ```
 
+
+
 ### NavigationOptions
-NavigationOptions provide easy customization of the NavigationFragment's behavior. NavigationOptions encapsulates groups of sub-options e.g. VehicleOptions, MapOptions, GpsOptions. Setting options on an options object can be chained. If a single option is not set, it will revert to its default value. Some options are mandatory but don't have a default option. The example below is the minimal NavigationOptions object needed to get the Navigator _working_.
-```java
-NavigationOptions options = new NavigationOptions()
-  .directionsFactory(\** Implement IDirectionsFactory **\)
-  .latLngVehicleMarkerFactory(\** Implement IVehicleMarkerFactory **\)
-  .mapFactory(\** Implement IMapFactory **\)
-```
+NavigationOptions provide easy customization of the NavigationFragment's behavior. NavigationOptions encapsulates groups of sub-options e.g. VehicleOptions, MapOptions, GpsOptions. Setting options on an options object can be chained. If a single option is not set, it will revert to its default value.
