@@ -5,7 +5,7 @@ import com.navidroid.model.directions.Directions;
 
 public interface INavigatorStateListener {
 	
-	void OnNewPathFoundFailed(String message, LatLng origin, LatLng destination);
+	void OnNewPathFoundFailed(Exception e, LatLng origin, LatLng destination);
 	
 	void OnNewPathFound(Directions directions, LatLng origin, LatLng destination);
 	

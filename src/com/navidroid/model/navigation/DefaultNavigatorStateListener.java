@@ -2,7 +2,10 @@ package com.navidroid.model.navigation;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.widget.Toast;
 
 import com.navidroid.DirectionFragment;
 import com.navidroid.DirectionsOverlayFragment;
@@ -17,32 +20,30 @@ public class DefaultNavigatorStateListener implements INavigatorStateListener {
 	
 	private static final int DIRECTIONS_REREQUEST_BACKOFF_MS = 5000;
 	
+	private NavigationFragment fragment;
 	private DirectionsOverlayFragment directionsOverlayFragment;
 	private DirectionFragment currentDirectionFragment;
 	private Activity parentActivity;
 	private Navigator navigator;
+	private Handler handler = new Handler();
 	
 	public DefaultNavigatorStateListener(NavigationFragment fragment) {
+		this.fragment = fragment;
 		parentActivity = fragment.getActivity();
 		navigator = fragment.getNavigator();
 		directionsOverlayFragment = new DirectionsOverlayFragment();
 	}
 	
 	@Override
-	public void OnNewPathFoundFailed(String message, LatLng origin, LatLng destination) {
-		AsyncTaskExecutor.execute(new AsyncTask<Void, Void, Void>() {
+	public void OnNewPathFoundFailed(Exception e, LatLng origin, LatLng destination) {
+		Context context = fragment.getView().getContext();
+		Toast.makeText(context, "Directions request failed", Toast.LENGTH_SHORT).show();
+		handler.postDelayed(new Runnable() {
 			@Override
-			protected Void doInBackground(Void... params) {
-				try {
-					Thread.sleep(DIRECTIONS_REREQUEST_BACKOFF_MS);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				navigator.go(navigator.getDestination());
-				return null;
+			public void run() {
+				fragment.getNavigator().reroute();
 			}
-			
-		});
+		}, DIRECTIONS_REREQUEST_BACKOFF_MS);
 	}
 	
 	@Override

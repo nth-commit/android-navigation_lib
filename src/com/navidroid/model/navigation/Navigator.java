@@ -12,7 +12,7 @@ import com.navidroid.model.LatLng;
  * via NavigationFragment.getNavigator(), as soon
  * as the NavigationFragment is instantiated.
  */
-public class Navigator {
+public class Navigator implements INavigator {
 	
 	private interface WhenNavigatorReady {
 		void invoke(InternalNavigator navigator);
@@ -55,6 +55,19 @@ public class Navigator {
 			});
 		} else {
 			navigator.stop();
+		}
+	}
+	
+	public void reroute() {
+		if (navigator == null) {
+			callbacks.add(new WhenNavigatorReady() {
+				@Override
+				public void invoke(InternalNavigator navigator) {
+					navigator.reroute();
+				}
+			});
+		} else {
+			navigator.reroute();
 		}
 	}
 	

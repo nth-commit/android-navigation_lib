@@ -15,7 +15,7 @@ import com.navidroid.model.util.LatLngUtil;
 import com.navidroid.model.vehicle.Vehicle;
 import com.navidroid.model.vehicle.VehicleSmoother;
 
-public class InternalNavigator {
+public class InternalNavigator implements INavigator {
 	
 	private final int MIN_ARRIVAL_DIST_METERS = 10;
 	private final int OFF_PATH_TOLERANCE_METERS = 10;
@@ -88,8 +88,8 @@ public class InternalNavigator {
 			}
 			
 			@Override
-			public void onFailure(String message, LatLng origin, LatLng destination) {
-				navigatorStateListener.OnNewPathFoundFailed(message, origin, destination);
+			public void onFailure(Exception e, LatLng origin, LatLng destination) {
+				navigatorStateListener.OnNewPathFoundFailed(e, origin, destination);
 			}
 		});
 	}
@@ -100,6 +100,14 @@ public class InternalNavigator {
 			navigationState.endNavigation();
 			vehicle.signalNotFollowing();
 			map.removePolylinePath();
+		}
+	}
+	
+	public void reroute() {
+		synchronized (navigatingLock) {
+			if (destination != null) {
+				go(destination);
+			}
 		}
 	}
 	

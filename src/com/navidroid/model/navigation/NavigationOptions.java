@@ -1,6 +1,5 @@
 package com.navidroid.model.navigation;
 
-import com.navidroid.model.directions.IDirectionsFactory;
 import com.navidroid.model.map.MapOptions;
 import com.navidroid.model.positioning.GpsOptions;
 import com.navidroid.model.vehicle.VehicleOptions;
@@ -10,6 +9,7 @@ public class NavigationOptions {
 	private VehicleOptions vehicleOptions = new VehicleOptions();
 	private MapOptions mapOptions = new MapOptions();
 	private GpsOptions gpsOptions = new GpsOptions();
+	private INavigatorStateListenerFactory navigationStateListenerFactory = new DefaultNavigatorStateListenerFactory();
 	
 	public NavigationOptions vehicleOptions(VehicleOptions options) {
 		vehicleOptions = options;
@@ -36,5 +36,14 @@ public class NavigationOptions {
 	
 	public GpsOptions gpsOptions() {
 		return gpsOptions;
+	}
+	
+	public NavigationOptions navigationStateListenerFactory(INavigatorStateListenerFactory navigationStateListenerFactory) {
+		this.navigationStateListenerFactory = navigationStateListenerFactory;
+		return this;
+	}
+	
+	public INavigatorStateListenerFactory navigationStateListenerFactory() {
+		return navigationStateListenerFactory;
 	}
 }

@@ -17,7 +17,7 @@ public class Route extends AsyncTask<Void, Void, String> {
 	
 	public interface DirectionsRetrieved {
 		void onSuccess(Directions directions, LatLng origin, LatLng destination);
-		void onFailure(String message, LatLng origin, LatLng destination);
+		void onFailure(Exception e, LatLng origin, LatLng destination);
 	}
 	
 	private LatLng origin;
@@ -44,11 +44,10 @@ public class Route extends AsyncTask<Void, Void, String> {
 			HttpResponse response = http.execute(new HttpGet(url));
 			HttpEntity entity = response.getEntity();
 			return EntityUtils.toString(entity);
-		} catch (Exception ex) {
-			String error = "Failed to retrieve directions with exception: " + ex.getMessage();
-			Log.e("DefinedError", error);
-			directionsRetrieved.onFailure(error, origin, destination);
-			ex.printStackTrace();
+		} catch (Exception e) {
+			String error = "Failed to retrieve directions with exception: " + e.getMessage();
+			Log.e("com.navidroid", error);
+			directionsRetrieved.onFailure(e, origin, destination);
 		}
 		return null;
 	}
@@ -59,8 +58,7 @@ public class Route extends AsyncTask<Void, Void, String> {
 			Directions directions = directionsFactory.createDirections(origin, destination, response);
 			directionsRetrieved.onSuccess(directions, origin, destination);
 		} catch (Exception e) {
-			Log.e("DefinedError", e.getMessage());
-			directionsRetrieved.onFailure(e.getMessage(), origin, destination);
+			directionsRetrieved.onFailure(e, origin, destination);
 		}
 	}
 }
