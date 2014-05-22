@@ -65,16 +65,35 @@ public class StaticVehicleMarker {
 
 	private void setLayoutParams(double tilt) {
 		if (isVisible && tilt != currentTilt) {
-			final int imageHeight = (int)(image.getHeight() * Math.cos(Math.toRadians(tilt)));
-			final int imageWidth = image.getWidth();
-			final Bitmap flattenedImage = Bitmap.createScaledBitmap(image, imageWidth, imageHeight, true);
+			final Point mapSize = map.getSize();
+			double viewAngle = 90 - tilt;
+			double halfMapHeight = 0.5 * mapSize.y; 
+			double cameraPosY = halfMapHeight * Math.cos(Math.toRadians(viewAngle)) + halfMapHeight;
+			double cameraPosZ = halfMapHeight * Math.sin(Math.toRadians(viewAngle));
+			
+			PointD anchor = vehicle.getScreenAnchor();
+			double markerCenterX = mapSize.x * anchor.x;
+			double markerCenterY = mapSize.y * anchor.y;
+			double markerCameraHorizontalDist = cameraPosY - markerCenterY;
+			double tanQuotient = cameraPosZ / markerCameraHorizontalDist;
+			double angleToMarker = 90 - Math.toDegrees(Math.atan(tanQuotient));
+			
+			int imageHeight = image.getHeight();
+			int scaledImageHeight = (int)(imageHeight * Math.cos(Math.toRadians(angleToMarker)));
+			
+			double distanceToVehicle = Math.sqrt(Math.pow(markerCameraHorizontalDist, 2) + Math.pow(cameraPosZ, 2));
+			int imageWidth = image.getWidth();
+			double distanceRatio = halfMapHeight / distanceToVehicle;
+			int percievedWidth = (int)(imageWidth * distanceRatio);  
+			
+			Bitmap flattenedImage = Bitmap.createScaledBitmap(image, percievedWidth, scaledImageHeight, true);
 			markerImageView.setImageBitmap(flattenedImage);
 			
-			final Point mapSize = map.getSize();
-			final PointD anchor = vehicle.getScreenAnchor();
-			LayoutParams layout = new LayoutParams(imageWidth, imageHeight) {{
-				leftMargin = (int)((mapSize.x * anchor.x) - width / 2);
-				topMargin = (int)((mapSize.y * anchor.y) - height / 2);
+			final int markerLeftMargin = (int)(markerCenterX - percievedWidth / 2);
+			final int markerTopMargin = (int)(markerCenterY - scaledImageHeight / 2);
+			LayoutParams layout = new LayoutParams(percievedWidth, scaledImageHeight) {{
+				leftMargin = markerLeftMargin;
+				topMargin = markerTopMargin;
 			}};
 			markerImageView.setLayoutParams(layout);
 			currentTilt = tilt;
