@@ -21,7 +21,7 @@ public class SimulatedGps extends AbstractSimulatedGps {
 				whileHasCurrentPath(new WhileHasCurrentPathAction() {
 					@Override
 					public void invoke() {
-						advancePosition(currentPath);
+						advancePosition(currentPath, System.currentTimeMillis());
 						publishProgress();
 						try {
 							Thread.sleep(updateIntervalMs);

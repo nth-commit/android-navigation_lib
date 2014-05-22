@@ -15,7 +15,7 @@ public class DebugSimulatedGps extends AbstractSimulatedGps {
 		whileHasCurrentPath(new WhileHasCurrentPathAction() {
 			@Override
 			public void invoke() {
-				advancePosition(currentPath);
+				advancePosition(currentPath, currentPosition.timestamp + updateIntervalMs);
 				onTickHandler.invoke(currentPosition);	
 			}
 		});

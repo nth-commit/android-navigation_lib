@@ -1,7 +1,6 @@
 package com.navidroid.model.positioning;
 
 import java.util.List;
-import java.util.Random;
 
 import android.util.Log;
 
@@ -75,9 +74,8 @@ public abstract class AbstractSimulatedGps extends AbstractGps {
 		return currentPosition.location;
 	}
 	
-	protected void advancePosition(List<LatLng> path) {
-		long newTime = System.currentTimeMillis();
-		long timePassedMillisconds = updateIntervalMs;
+	protected void advancePosition(List<LatLng> path, long toTime) {
+		long timePassedMillisconds = toTime - currentPosition.timestamp;
 		double distanceRemaining = (timePassedMillisconds / S_TO_MS) * SPEED_LIMIT_MPS;
 		LatLng currentLocation = currentPosition.location;
 		double currentBearing = 0;
@@ -95,7 +93,7 @@ public abstract class AbstractSimulatedGps extends AbstractGps {
 			}
 		}
 		
-		currentPosition = new Position(currentLocation, currentBearing, newTime);
+		currentPosition = new Position(currentLocation, currentBearing, toTime);
 		if (simulateError) {
 			messUpCurrentPosition();
 		}
