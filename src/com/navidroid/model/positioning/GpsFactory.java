@@ -12,7 +12,7 @@ public class GpsFactory {
 	
 	public static IGps create(GpsOptions options, LocationClient locationClient) {
 		if (options.gpsType() == GpsType.SIMULATED) {
-			if (options.debugMode()) {
+			if (options.simulatedGpsOptions().debugMode()) {
 				return new DebugSimulatedGps(options, Defaults.LOCATION);
 			} else {
 				return new SimulatedGps(options, Defaults.LOCATION);

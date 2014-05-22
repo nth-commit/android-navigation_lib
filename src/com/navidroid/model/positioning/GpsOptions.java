@@ -13,10 +13,8 @@ public class GpsOptions {
 	}
 	
 	private GpsType gpsType = GpsType.REAL;
-	private boolean debugMode = false;
+	private SimulatedGpsOptions simulatedGpsOptions = new SimulatedGpsOptions();
 	private int updateIntervalMilliseconds = 500;
-	private LatLng simulatedLocation = Defaults.LOCATION;
-	private List<LatLng> simulatedPath;
 	
 	public GpsOptions gpsType(GpsType gpsType) {
 		this.gpsType = gpsType;
@@ -25,15 +23,6 @@ public class GpsOptions {
 	
 	public GpsType gpsType() {
 		return gpsType;
-	}
-	
-	public GpsOptions debugMode(boolean debugMode) {
-		this.debugMode = debugMode;
-		return this;
-	}
-	
-	public boolean debugMode() {
-		return debugMode;
 	}
 	
 	public GpsOptions updateIntervalMilliseconds(int updateIntervalMilliseconds) {
@@ -45,21 +34,12 @@ public class GpsOptions {
 		return updateIntervalMilliseconds;
 	}
 	
-	public GpsOptions simulatedLocation(LatLng simulatedLocation) {
-		this.simulatedLocation = simulatedLocation;
+	public GpsOptions simulatedGpsOptions(SimulatedGpsOptions options) {
+		simulatedGpsOptions = options;
 		return this;
 	}
 	
-	public LatLng simulatedLocation() {
-		return simulatedLocation;
-	}
-	
-	public GpsOptions simulatedPath(List<LatLng> simulatedPath) {
-		this.simulatedPath = simulatedPath;
-		return this;
-	}
-	
-	public List<LatLng> simulatedPath() {
-		return simulatedPath;
+	public SimulatedGpsOptions simulatedGpsOptions() {
+		return simulatedGpsOptions;
 	}
 }

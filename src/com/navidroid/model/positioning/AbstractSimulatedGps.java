@@ -1,9 +1,13 @@
 package com.navidroid.model.positioning;
 
 import java.util.List;
+import java.util.Random;
+
+import android.util.Log;
 
 import com.navidroid.model.LatLng;
 import com.navidroid.model.util.LatLngUtil;
+import com.navidroid.model.util.MathUtil;
 
 public abstract class AbstractSimulatedGps extends AbstractGps {
 	
@@ -15,16 +19,21 @@ public abstract class AbstractSimulatedGps extends AbstractGps {
 	private final double KPH_TO_MPS = 0.277778;
 	private final double SPEED_LIMIT_MPS = SPEED_LIMIT_KPH * KPH_TO_MPS;
 	private final double S_TO_MS = 1000;
+	private final int MAX_ERROR_DIST_METERS = 10;
+	private final int MAX_ERROR_HEADING_DEGREES = 5;
 	
 	protected Position currentPosition;
 	protected List<LatLng> currentPath;
 	protected List<LatLng> customPath;
 	
-	private Object currentPathLock = new Object(); 
+	private Object currentPathLock = new Object();
+	
+	private boolean simulateError;
 	
 	public AbstractSimulatedGps(GpsOptions options, LatLng location) {
 		super(options);
-		customPath = options.simulatedPath();
+		customPath = options.simulatedGpsOptions().simulatedPath();
+		simulateError = options.simulatedGpsOptions().simulateError();
 		currentPosition = new Position(location, 0, System.currentTimeMillis());
 	}
 
@@ -87,6 +96,23 @@ public abstract class AbstractSimulatedGps extends AbstractGps {
 		}
 		
 		currentPosition = new Position(currentLocation, currentBearing, newTime);
+		if (simulateError) {
+			messUpCurrentPosition();
+		}
+	}
+	
+	private void messUpCurrentPosition() {
+		int distanceErrorMagnitude = MathUtil.randomInt(0, MAX_ERROR_DIST_METERS);
+		int distanceErrorVector = MathUtil.randomInt(0, 360);
+		LatLng currentLocation = currentPosition.location;
+		LatLng errorLocation = LatLngUtil.travel(currentLocation, distanceErrorVector, distanceErrorMagnitude);
+		double currentBearing = currentPosition.bearing;
+		double errorBearing = MathUtil.randomInt((int)(currentBearing - MAX_ERROR_HEADING_DEGREES), (int)(currentBearing + MAX_ERROR_HEADING_DEGREES));
+		errorBearing = LatLngUtil.normalizeBearing(errorBearing);
+		Log.i("com.navidroid", String.format("Init location: %s, error location: %s, init bearing: %s, error bearing %s",
+				currentLocation, errorLocation, currentBearing, errorBearing));
+		currentPosition.location = errorLocation;
+		currentPosition.bearing = errorBearing;
 	}
 	
 	protected void whileHasCurrentPath(WhileHasCurrentPathAction action) {

@@ -1,20 +1,11 @@
 package com.navidroid.model.vehicle;
 
-import java.util.ArrayList;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 
 import com.navidroid.NavigationFragment;
 import com.navidroid.model.LatLng;
 import com.navidroid.model.PointD;
 import com.navidroid.model.map.NavigationMap;
-import com.navidroid.model.positioning.Position;
-import com.navidroid.model.util.AsyncTaskExecutor;
-import com.navidroid.model.util.LatLngUtil;
-import com.navidroid.model.util.ListUtil;
-import com.navidroid.model.util.MathUtil;
-import com.navidroid.model.util.ListUtil.Predicate;
-
 public class Vehicle {
 	
 	private Bitmap image;
