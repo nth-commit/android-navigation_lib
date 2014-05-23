@@ -1,5 +1,7 @@
 package com.navidroid.model.navigation;
 
+import android.util.Log;
+
 import com.navidroid.NavigationFragment;
 import com.navidroid.model.LatLng;
 import com.navidroid.model.directions.Directions;
@@ -98,7 +100,7 @@ public class InternalNavigator implements INavigator {
 		synchronized (navigatingLock) {
 			destination = null;
 			navigationState.endNavigation();
-			vehicle.signalNotFollowing();
+			map.unfollowVehicle();
 			map.removePolylinePath();
 		}
 	}
@@ -126,11 +128,11 @@ public class InternalNavigator implements INavigator {
 	private void beginNavigation(Directions directions, LatLng location) {
 		synchronized (navigatingLock) {
 			redirectNavigation(directions, location);
-			map.followVehicle();
+			navigatorStateListener.OnDeparture(navigationState);
+			assert navigationState.isNavigating();
 			if (gps instanceof AbstractSimulatedGps) {
 				((AbstractSimulatedGps)gps).followPath(directions.getLatLngPath());
 			}
-			navigatorStateListener.OnDeparture(navigationState);
 		}
 	}
 	
@@ -139,6 +141,7 @@ public class InternalNavigator implements INavigator {
 			navigationState.startNavigation(directions);
 			destination = location;
 			map.addPathPolyline(directions.getLatLngPath());
+			map.followVehicle();
 		}
 	}
 	
@@ -183,13 +186,12 @@ public class InternalNavigator implements INavigator {
 			if (navigationStateSnapshot.getDistanceOffPath() > OFF_PATH_TOLERANCE_METERS ||
 				navigationStateSnapshot.getBearingDifferenceFromPath() > OFF_PATH_TOLERANCE_BEARING) {
 				
-				if (lastNavigationStateSnapshot.isNavigating() && !lastNavigationStateSnapshot.isHeadingOffPath()) {
-					// Last time we checked, we were navigating but not heading off path.
+				if (!lastNavigationStateSnapshot.isNavigating() || !lastNavigationStateSnapshot.isHeadingOffPath()) {
+					// Last time we checked, we werern't navigating or we weren't heading off path.
 					navigationState.signalHeadingOffPath();
 				} else if (navigationStateSnapshot.isOnPath() &&
 					navigationStateSnapshot.getTime() - navigationStateSnapshot.getHeadingOffPathStartTime() > MAX_TIME_OFF_PATH_MS) {
 					// We have been off path for the tolerance time and not yet signalled so.
-					
 					navigationState.signalOffPath();
 					navigatorStateListener.OnVehicleOffPath(navigationState);
 				}

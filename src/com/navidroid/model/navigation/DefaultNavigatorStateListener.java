@@ -62,7 +62,7 @@ public class DefaultNavigatorStateListener implements INavigatorStateListener {
 
 	@Override
 	public void OnVehicleOffPath(NavigationState state) {
-		navigator.go(navigator.getDestination());
+		navigator.reroute();
 	}
 	
 	@Override
@@ -74,7 +74,7 @@ public class DefaultNavigatorStateListener implements INavigatorStateListener {
 		}
 		currentDirectionFragment = DirectionFragment.newInstance(direction);
 		ft.add(R.id.direction_fragment_container, currentDirectionFragment);
-		ft.commit();
+		ft.commit(); // TODO: Can throw exception - Activity has been destroyed
 	}
 	
 	public void OnNavigatorTick(NavigationState state) {
