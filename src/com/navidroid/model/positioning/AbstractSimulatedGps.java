@@ -107,8 +107,6 @@ public abstract class AbstractSimulatedGps extends AbstractGps {
 		double currentBearing = currentPosition.bearing;
 		double errorBearing = MathUtil.randomInt((int)(currentBearing - MAX_ERROR_HEADING_DEGREES), (int)(currentBearing + MAX_ERROR_HEADING_DEGREES));
 		errorBearing = LatLngUtil.normalizeBearing(errorBearing);
-		Log.i("com.navidroid", String.format("Init location: %s, error location: %s, init bearing: %s, error bearing %s",
-				currentLocation, errorLocation, currentBearing, errorBearing));
 		currentPosition.location = errorLocation;
 		currentPosition.bearing = errorBearing;
 	}

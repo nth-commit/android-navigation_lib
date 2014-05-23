@@ -14,7 +14,6 @@ public class NavigationState {
 	protected double bearingOnPath;
 	protected double distanceOffPath;
 	protected double bearingDifferenceFromPath;
-	protected int currentIndex;
 	protected Point currentPoint;
 	protected double distanceToNextPoint;
 	protected double progressAlongSegment;
@@ -31,7 +30,6 @@ public class NavigationState {
 		this.bearingOnPath = navigationStateSnapshot.bearingOnPath;
 		this.distanceOffPath = navigationStateSnapshot.distanceOffPath;
 		this.bearingDifferenceFromPath = navigationStateSnapshot.bearingDifferenceFromPath;
-		this.currentIndex = navigationStateSnapshot.currentIndex;
 		this.currentPoint = navigationStateSnapshot.currentPoint;
 		this.distanceToNextPoint = navigationStateSnapshot.distanceToNextPoint;
 		this.progressAlongSegment = navigationStateSnapshot.progressAlongSegment;

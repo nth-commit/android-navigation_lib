@@ -15,4 +15,5 @@ public class Point {
 	public Direction direction;
 	public Direction nextDirection;
 	public Point nextPoint;
+	public int pathIndex;
 }

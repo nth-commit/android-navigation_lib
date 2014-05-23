@@ -1,5 +1,7 @@
 package com.navidroid.model.navigation;
 
+import android.util.Log;
+
 import com.navidroid.model.LatLng;
 import com.navidroid.model.directions.Directions;
 import com.navidroid.model.directions.Point;
@@ -23,7 +25,6 @@ public class MutableNavigationState extends NavigationState {
 	
 	public void startNavigation(Directions directions) {
 		path = directions.getPath();
-		currentIndex = 0;
 		currentPoint = path.get(0);
 		isHeadingOffPath = false;
 		isOnPath = true;
@@ -32,7 +33,6 @@ public class MutableNavigationState extends NavigationState {
 	public void endNavigation() {
 		path = null;
 		currentPoint = null;
-		currentIndex = 0;
 		locationOnPath = null;
 		distanceOffPath = 0;
 		bearingOnPath = 0;
@@ -41,6 +41,7 @@ public class MutableNavigationState extends NavigationState {
 
 	public void signalOnPath() {
 		isOnPath = true;
+		isHeadingOffPath = false;
 	}
 	
 	public void signalHeadingOffPath() {
@@ -57,8 +58,8 @@ public class MutableNavigationState extends NavigationState {
 	}	
 	
 	private void calculateLocationOnPath() {
+		int currentIndex = currentPoint == null ? 0 : currentPoint.pathIndex;
 		double bestDistanceOffPath = Double.MAX_VALUE;
-		int bestIndex = 0;
 		LatLng bestLocation = null;
 		Point bestPoint = null;
 		
@@ -73,21 +74,19 @@ public class MutableNavigationState extends NavigationState {
 
 			if (currentDistance < bestDistanceOffPath) {
 				bestDistanceOffPath = currentDistance;
-				bestIndex = i;
 				bestPoint = currentPoint;
 				bestLocation = currentLocationOnPath;
 			}
 		}
 		
 		distanceOffPath = bestDistanceOffPath;
-		currentIndex = bestIndex;
 		currentPoint = bestPoint;
 		locationOnPath = bestLocation;
 	}
 	
 	private void calculateBearingOnPath() {
 		bearingOnPath = LatLngUtil.initialBearing(currentPoint.location, currentPoint.nextPoint.location);
-		bearingDifferenceFromPath = Math.max(bearingOnPath, position.bearing) - Math.min(bearingOnPath, position.bearing);
+		bearingDifferenceFromPath = LatLngUtil.bearingDiff(bearingOnPath, position.bearing);
 	}
 	
 	private void calculateDistanceToNextPoint() {

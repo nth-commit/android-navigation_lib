@@ -28,6 +28,7 @@ public class Directions {
 		this.directions = directions;
 		validateDirections();
 		createPath();
+		indexPath();
 		createLatLngPath();
 	}
 	
@@ -104,6 +105,15 @@ public class Directions {
 			nextDirection = isNewDirection ? next.direction : next.nextDirection;
 			nextPoint = next;
 		}};
+	}
+	
+	private void indexPath() {
+		Point currentPoint = path.get(0);
+		int currentIndex = 0;
+		do {
+			currentPoint.pathIndex = currentIndex;
+			currentIndex++;
+		} while ((currentPoint = currentPoint.nextPoint) != null);
 	}
 	
 	private void createLatLngPath() {

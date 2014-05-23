@@ -103,6 +103,14 @@ public class LatLngUtil {
             return bearingResult;
     }
     
+    public static double bearingDiff(double a, double b) {
+    	double maxBearing = Math.max(a, b);
+    	double minBearing = Math.min(a, b);
+    	double antiClockwiseDiff = maxBearing - minBearing;
+    	double clockwiseDiff = minBearing + 360 - maxBearing;
+    	return Math.min(antiClockwiseDiff, clockwiseDiff);
+    }
+    
     public static LatLng closestLocationOnLine(LatLng a, LatLng b, LatLng p) {
     	double apLng = p.longitude - a.longitude;
     	double apLat = p.latitude - a.latitude;
