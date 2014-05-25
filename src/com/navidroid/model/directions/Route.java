@@ -58,6 +58,7 @@ public class Route extends AsyncTask<Void, Void, String> {
 			Directions directions = directionsFactory.createDirections(origin, destination, response);
 			directionsRetrieved.onSuccess(directions, origin, destination);
 		} catch (Exception e) {
+			Log.e("com.navidroid", "Error parsing response from directions service.");
 			directionsRetrieved.onFailure(e, origin, destination);
 		}
 	}

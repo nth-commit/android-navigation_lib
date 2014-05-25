@@ -14,6 +14,7 @@ public class Point {
 	public double timeToArrivalSeconds;
 	public Direction direction;
 	public Direction nextDirection;
-	public Point nextPoint;
+	public Point prev;
+	public Point next;
 	public int pathIndex;
 }

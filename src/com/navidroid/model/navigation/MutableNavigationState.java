@@ -68,8 +68,8 @@ public class MutableNavigationState extends NavigationState {
 				i++) {
 			
 			Point currentPoint = path.get(i);
-			LatLng currentLocationOnPath = currentPoint.nextPoint == null ? currentPoint.location :
-				LatLngUtil.closestLocationOnLine(currentPoint.location, currentPoint.nextPoint.location, position.location);
+			LatLng currentLocationOnPath = currentPoint.next == null ? currentPoint.location :
+				LatLngUtil.closestLocationOnLine(currentPoint.location, currentPoint.next.location, position.location);
 			double currentDistance = LatLngUtil.distanceInMeters(position.location, currentLocationOnPath);
 
 			if (currentDistance < bestDistanceOffPath) {
@@ -85,19 +85,19 @@ public class MutableNavigationState extends NavigationState {
 	}
 	
 	private void calculateBearingOnPath() {
-		bearingOnPath = LatLngUtil.initialBearing(currentPoint.location, currentPoint.nextPoint.location);
+		bearingOnPath = LatLngUtil.initialBearing(currentPoint.location, currentPoint.next.location);
 		bearingDifferenceFromPath = LatLngUtil.bearingDiff(bearingOnPath, position.bearing);
 	}
 	
 	private void calculateDistanceToNextPoint() {
-		Point nextPoint = currentPoint.nextPoint;
+		Point nextPoint = currentPoint.next;
 		if (nextPoint != null) {
 			distanceToNextPoint = LatLngUtil.distanceInMeters(locationOnPath, nextPoint.location);
 		}
 	}
 	
 	private void calculateProgressAlongSegment() {
-		Point nextPoint = currentPoint.nextPoint;
+		Point nextPoint = currentPoint.next;
 		if (nextPoint != null) {
 			double segmentDistance = currentPoint.distanceToNextPointMeters;
 			progressAlongSegment = segmentDistance == 0 ? 0 : distanceToNextPoint / segmentDistance; 

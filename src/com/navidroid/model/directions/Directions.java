@@ -80,13 +80,13 @@ public class Directions {
 			timeToArrivalSeconds = 0;
 			direction = directions.get(directions.size() - 1);
 			nextDirection = null;
-			nextPoint = null;
+			next = null;
 		}};
 	}
 	
-	private Point createPoint(final LatLng loc, final Direction dir, final Point next) {
-		final boolean isNewDirection = next.direction != dir;
-		final double distanceToNext = LatLngUtil.distanceInMeters(loc, next.location);
+	private Point createPoint(final LatLng loc, final Direction dir, final Point nextPoint) {
+		final boolean isNewDirection = nextPoint.direction != dir;
+		final double distanceToNext = LatLngUtil.distanceInMeters(loc, nextPoint.location);
 		double directionDistance = dir.getDistanceInMeters();
 		double ratioOfTotalDistance = directionDistance == 0 ? 0 : distanceToNext / directionDistance;
 		final double timeToNext = ratioOfTotalDistance == 0 ? 0 : dir.getTimeInSeconds() * ratioOfTotalDistance;
@@ -95,25 +95,28 @@ public class Directions {
 			location = loc;
 			distanceToNextPointMeters = distanceToNext;
 			timeToNextPointSeconds = timeToNext;
-			distanceToCurrentDirectionMeters = isNewDirection ? 0 : next.distanceToCurrentDirectionMeters + distanceToNext;
-			timeToCurrentDirectionSeconds = isNewDirection ? 0 : next.timeToCurrentDirectionSeconds + timeToNext;
-			distanceToNextDirectionMeters = isNewDirection ? next.distanceToCurrentDirectionMeters + distanceToNext : next.distanceToNextDirectionMeters + distanceToNext;
-			timeToNextDirectionSeconds = isNewDirection ? next.timeToCurrentDirectionSeconds + timeToNext : next.timeToNextDirectionSeconds + timeToNext;
-			distanceToArrivalMeters = next.distanceToArrivalMeters + distanceToNext;
-			timeToArrivalSeconds = next.timeToArrivalSeconds + timeToNext;
+			distanceToCurrentDirectionMeters = isNewDirection ? 0 : nextPoint.distanceToCurrentDirectionMeters + distanceToNext;
+			timeToCurrentDirectionSeconds = isNewDirection ? 0 : nextPoint.timeToCurrentDirectionSeconds + timeToNext;
+			distanceToNextDirectionMeters = isNewDirection ? nextPoint.distanceToCurrentDirectionMeters + distanceToNext : nextPoint.distanceToNextDirectionMeters + distanceToNext;
+			timeToNextDirectionSeconds = isNewDirection ? nextPoint.timeToCurrentDirectionSeconds + timeToNext : nextPoint.timeToNextDirectionSeconds + timeToNext;
+			distanceToArrivalMeters = nextPoint.distanceToArrivalMeters + distanceToNext;
+			timeToArrivalSeconds = nextPoint.timeToArrivalSeconds + timeToNext;
 			direction = dir;
-			nextDirection = isNewDirection ? next.direction : next.nextDirection;
-			nextPoint = next;
+			nextDirection = isNewDirection ? nextPoint.direction : nextPoint.nextDirection;
+			next = nextPoint;
 		}};
 	}
 	
 	private void indexPath() {
 		Point currentPoint = path.get(0);
+		Point lastPoint = null;
 		int currentIndex = 0;
 		do {
 			currentPoint.pathIndex = currentIndex;
+			currentPoint.prev = lastPoint;
 			currentIndex++;
-		} while ((currentPoint = currentPoint.nextPoint) != null);
+			lastPoint = currentPoint;
+		} while ((currentPoint = currentPoint.next) != null);
 	}
 	
 	private void createLatLngPath() {

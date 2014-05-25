@@ -174,11 +174,11 @@ public class VehicleSmoother {
 		ArrayList<LatLng> path = new ArrayList<LatLng>();
 		path.add(a.getLocationOnPath());
 		if (b != null) {
-			Point currentPoint = a.getCurrentPoint().nextPoint;
+			Point currentPoint = a.getCurrentPoint().next;
 			int lastIndex = b.getCurrentPoint().pathIndex;
 			while (currentPoint.pathIndex <= lastIndex) {
 				path.add(currentPoint.location);
-				currentPoint = currentPoint.nextPoint;
+				currentPoint = currentPoint.next;
 			}
 			path.add(b.getLocationOnPath());
 		}

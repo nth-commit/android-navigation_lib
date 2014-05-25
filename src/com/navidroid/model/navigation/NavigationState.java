@@ -91,7 +91,7 @@ public class NavigationState {
 			return 0;
 		}
 		
-		Point nextPoint = currentPoint.nextPoint;
+		Point nextPoint = currentPoint.next;
 		return nextPoint == null ? 0 : distanceToNextPoint + nextPoint.distanceToCurrentDirectionMeters;
 	}
 	
@@ -100,7 +100,7 @@ public class NavigationState {
 			return 0;
 		}
 		
-		Point nextPoint = currentPoint.nextPoint;
+		Point nextPoint = currentPoint.next;
 		return nextPoint == null ? 0 : distanceToNextPoint + nextPoint.distanceToArrivalMeters;
 	}
 	
@@ -109,7 +109,7 @@ public class NavigationState {
 			return 0;
 		}
 		
-		Point nextPoint = currentPoint.nextPoint;
+		Point nextPoint = currentPoint.next;
 		double timeFromNextPoint = nextPoint == null ? 0 : nextPoint.timeToCurrentDirectionSeconds;
 		return progressAlongSegment * currentPoint.timeToCurrentDirectionSeconds + timeFromNextPoint;
 	}
@@ -119,7 +119,7 @@ public class NavigationState {
 			return 0;
 		}
 		
-		Point nextPoint = currentPoint.nextPoint;
+		Point nextPoint = currentPoint.next;
 		double timeToNextPoint = progressAlongSegment * currentPoint.timeToCurrentDirectionSeconds;
 		return nextPoint == null || currentPoint.direction != nextPoint.direction ? timeToNextPoint :
 			timeToNextPoint + nextPoint.timeToArrivalSeconds;

@@ -16,7 +16,6 @@ public class Vehicle {
 	
 	private IVehicleMarker latLngMarker;
 	private StaticVehicleMarker overlayMarker;
-
 		
 	public Vehicle(NavigationFragment navigationFragment, IVehicleMarkerFactory factory, NavigationMap navigationMap, VehicleOptions options) {
 		this.navigationMap = navigationMap;
