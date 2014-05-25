@@ -111,8 +111,13 @@ public class VehicleSmoother {
 		}
 		
 		if (b == null) {
-			location = a.getLocation();
-			bearing = a.getBearing();
+			if (a.isNavigating()) {
+				location = a.getLocationOnPath();
+				bearing = a.getBearingOnPath();
+			} else {
+				location = a.getLocation();
+				bearing = a.getBearing();
+			}
 			return;
 		}
 		
@@ -161,8 +166,6 @@ public class VehicleSmoother {
 		
 		location = currentLocation;
 		bearing = currentBearing;
-		
-		Log.e("com.navidroid", String.format("Bearing: %s", currentBearing));
 	}
 
 	private ArrayList<LatLng> getSubPathForNavigationStates(NavigationState a, NavigationState b) {
