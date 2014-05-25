@@ -20,6 +20,8 @@ public class NavigationState {
 	protected boolean isHeadingOffPath;
 	protected boolean isOnPath;
 	protected long headingOffPathStartTime;
+	protected boolean hasDeparted;
+	protected boolean hasStartedFollowingDirections;
 	
 	public NavigationState() { }
 	
@@ -127,5 +129,13 @@ public class NavigationState {
 	
 	public boolean isNavigating() {
 		return path != null;
+	}
+	
+	public boolean hasDeparted() {
+		return hasDeparted;
+	}
+	
+	public boolean hasStartedFollowingDirections() {
+		return hasStartedFollowingDirections;
 	}
 }

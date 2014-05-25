@@ -24,10 +24,16 @@ public class MutableNavigationState extends NavigationState {
 	}
 	
 	public void startNavigation(Directions directions) {
+		hasDeparted = false;
+		redirectNavigation(directions);
+	}
+	
+	public void redirectNavigation(Directions directions) {
 		path = directions.getPath();
 		currentPoint = path.get(0);
 		isHeadingOffPath = false;
 		isOnPath = true;
+		hasStartedFollowingDirections = false;
 	}
 	
 	public void endNavigation() {
@@ -51,6 +57,16 @@ public class MutableNavigationState extends NavigationState {
 	
 	public void signalOffPath() {
 		isOnPath = false;
+	}
+	
+	public void signalHasDeparted() {
+		hasDeparted = true;
+		assert isNavigating();
+	}
+	
+	public void signalHasStartedFollowingDirections() {
+		hasStartedFollowingDirections = true;
+		assert hasDeparted();
 	}
 	
 	public NavigationState getSnapshot() {
@@ -85,7 +101,7 @@ public class MutableNavigationState extends NavigationState {
 	}
 	
 	private void calculateBearingOnPath() {
-		bearingOnPath = LatLngUtil.initialBearing(currentPoint.location, currentPoint.next.location);
+		bearingOnPath = LatLngUtil.initialBearing(currentPoint.location, currentPoint.next.location); // TODO: Throws NPE
 		bearingDifferenceFromPath = LatLngUtil.bearingDiff(bearingOnPath, position.bearing);
 	}
 	

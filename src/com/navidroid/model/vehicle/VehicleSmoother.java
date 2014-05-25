@@ -113,7 +113,7 @@ public class VehicleSmoother {
 		}
 		
 		if (b == null) {
-			if (a.isNavigating()) {
+			if (a.hasDeparted()) {
 				location = a.getLocationOnPath();
 				bearing = a.getBearingOnPath();
 			} else {
@@ -123,7 +123,7 @@ public class VehicleSmoother {
 			return;
 		}
 		
-		if (a.isNavigating() && b.isNavigating()) {
+		if (a.hasDeparted() && b.hasDeparted()) {
 			calculatePositionOnPath(time, a, b);
 		} else {
 			calculatePositionOffPath(time, a, b);

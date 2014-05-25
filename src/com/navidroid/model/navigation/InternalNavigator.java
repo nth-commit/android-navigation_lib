@@ -36,7 +36,6 @@ public class InternalNavigator implements INavigator {
 	private NavigationState navigationStateSnapshot;
 	private NavigationState lastNavigationStateSnapshot;
 	private LatLng destination;
-	private boolean hasDeparted;
 	
 	private final Object navigatingLock = new Object();
 	
@@ -101,7 +100,6 @@ public class InternalNavigator implements INavigator {
 		synchronized (navigatingLock) {
 			destination = null;
 			navigationState.endNavigation();
-			map.unfollowVehicle();
 			map.removePolylinePath();
 		}
 	}
@@ -128,8 +126,10 @@ public class InternalNavigator implements INavigator {
 	
 	private void beginNavigation(Directions directions, LatLng location) {
 		synchronized (navigatingLock) {
-			redirectNavigation(directions, location);
-			hasDeparted = false;
+			destination = location;
+			map.addPathPolyline(directions.getLatLngPath());
+			map.followVehicle();
+			navigationState.startNavigation(directions);
 			navigatorStateListener.OnNavigationStarted(navigationState);
 			assert navigationState.isNavigating();
 			if (gps instanceof AbstractSimulatedGps) {
@@ -140,10 +140,10 @@ public class InternalNavigator implements INavigator {
 	
 	private void redirectNavigation(Directions directions, LatLng location) {
 		synchronized (navigatingLock) {
-			navigationState.startNavigation(directions);
+			navigationState.redirectNavigation(directions);
 			destination = location;
 			map.addPathPolyline(directions.getLatLngPath());
-			map.followVehicle();
+			
 		}
 	}
 	
@@ -181,22 +181,27 @@ public class InternalNavigator implements INavigator {
 					currentDirection != lastNavigationStateSnapshot.getCurrentPoint().direction) {
 			
 				navigatorStateListener.OnNewDirection(navigationStateSnapshot);
-				
-				if (!hasDeparted && currentDirection.getMovement() != Movement.DEPARTURE) {
-					hasDeparted = true;
-					navigatorStateListener.OnDeparture(navigationStateSnapshot);
+				if (currentDirection.getMovement() != Movement.DEPARTURE) {
+					if (!navigationStateSnapshot.hasDeparted()) {
+						navigationState.signalHasDeparted();
+						navigatorStateListener.OnDeparture(navigationStateSnapshot);
+					}
+					if (!navigationStateSnapshot.hasStartedFollowingDirections()) {
+						navigationState.signalHasStartedFollowingDirections();
+					}
 				}
 			}
 		}
 	}
 	
 	private void checkOffPath() {
-		if (navigationStateSnapshot.isNavigating() && hasDeparted) {
+		if (navigationStateSnapshot.isNavigating() && navigationState.hasDeparted()) {
 			if (navigationStateSnapshot.getDistanceOffPath() > OFF_PATH_TOLERANCE_METERS ||
 				navigationStateSnapshot.getBearingDifferenceFromPath() > OFF_PATH_TOLERANCE_BEARING) {
 				
 				if (!lastNavigationStateSnapshot.isNavigating() || !lastNavigationStateSnapshot.isHeadingOffPath()) {
 					// Last time we checked, we werern't navigating or we weren't heading off path.
+					navigationState.signalHeadingOffPath();
 				} else if (navigationStateSnapshot.isOnPath() &&
 					navigationStateSnapshot.getTime() - navigationStateSnapshot.getHeadingOffPathStartTime() > MAX_TIME_OFF_PATH_MS) {
 					// We have been off path for the tolerance time and not yet signalled so.
