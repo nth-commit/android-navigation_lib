@@ -116,7 +116,7 @@ public class VehicleSmoother {
 			return;
 		}
 		
-		if (a.isNavigating() && b.isNavigating() && b.isOnPath()) {
+		if (a.isNavigating() && b.isNavigating()) {
 			calculatePositionOnPath(time, a, b);
 		} else {
 			calculatePositionOffPath(time, a, b);
@@ -124,47 +124,60 @@ public class VehicleSmoother {
 	}
 	
 	private void calculatePositionOnPath(long time, NavigationState a, NavigationState b) {
-		ArrayList<LatLng> path = getPathBetweenNavigationStates(a, b);
-		double distanceBetweenStates = LatLngUtil.distanceInMeters(path);
+		if (b.getDistanceToArrival() > a.getDistanceToArrival()) { // We have jumped back in the path
+			location = b.getLocationOnPath();
+			bearing = b.getBearingOnPath();
+		} else {
+			travelBetweenNavigationStates(time, a, b);
+		}
+	}
+	
+	private void travelBetweenNavigationStates(long time, NavigationState a, NavigationState b) {
+		ArrayList<LatLng> subPath = getSubPathForNavigationStates(a, b);
+		double distanceBetweenStates = LatLngUtil.distanceInMeters(subPath);
 		double deltaTime = b.getTime() - a.getTime();
 		double timeFromA = time - a.getTime();
 		double interpolationFactor = MathUtil.clamp(timeFromA / deltaTime, 0, 1);
 		double distanceRemaining = distanceBetweenStates * interpolationFactor;
-		LatLng currentLocation = path.remove(0);
+		LatLng currentLocation = subPath.remove(0);
 		double currentBearing = 0;
 		
-		while (path.size() > 0 && distanceRemaining > 0) { // TODO: Extract to LatLngUtil.travel(List<LatLng> path, double distance) with SimulatedGps logic
-			LatLng nextLocationInPath = path.get(0);
-			double distanceToNextPoint = LatLngUtil.distanceInMeters(currentLocation, nextLocationInPath);
-			double distanceToTravel = Math.min(distanceToNextPoint, distanceRemaining);
+		double distanceToNextPoint;
+		double distanceToTravel;
+		LatLng nextLocationInPath;
+		
+		while (subPath.size() > 0 && distanceRemaining > 0) {
+			nextLocationInPath = subPath.get(0);
+			distanceToNextPoint = LatLngUtil.distanceInMeters(currentLocation, nextLocationInPath);
+			distanceToTravel = Math.min(distanceToNextPoint, distanceRemaining);
 			currentBearing = LatLngUtil.initialBearing(currentLocation, nextLocationInPath);
 			currentLocation = LatLngUtil.travel(currentLocation, currentBearing, distanceToTravel);
-			
+
 			distanceRemaining -= distanceToTravel;
 			if (distanceRemaining > 0) {
-				path.remove(0);
+				subPath.remove(0);
 			}
 		}
 		
 		location = currentLocation;
 		bearing = currentBearing;
+		
+		Log.e("com.navidroid", String.format("Bearing: %s", currentBearing));
 	}
 
-	private ArrayList<LatLng> getPathBetweenNavigationStates(NavigationState a, NavigationState b) {
-		ArrayList<LatLng> locations = new ArrayList<LatLng>();
-		locations.add(a.getLocationOnPath());
-		
+	private ArrayList<LatLng> getSubPathForNavigationStates(NavigationState a, NavigationState b) {
+		ArrayList<LatLng> path = new ArrayList<LatLng>();
+		path.add(a.getLocationOnPath());
 		if (b != null) {
-			Point currentNextPoint = a.getCurrentPoint().nextPoint;
-			Point lastNextPoint = b.getCurrentPoint().nextPoint;
-			while (currentNextPoint != lastNextPoint) {
-				locations.add(currentNextPoint.location);
-				currentNextPoint = currentNextPoint.nextPoint;
+			Point currentPoint = a.getCurrentPoint().nextPoint;
+			int lastIndex = b.getCurrentPoint().pathIndex;
+			while (currentPoint.pathIndex <= lastIndex) {
+				path.add(currentPoint.location);
+				currentPoint = currentPoint.nextPoint;
 			}
-			locations.add(b.getLocationOnPath());
+			path.add(b.getLocationOnPath());
 		}
-		
-		return locations;
+		return path;
 	}
 	
 	private void calculatePositionOffPath(long time, NavigationState a, NavigationState b) {
