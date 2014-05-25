@@ -34,6 +34,8 @@ public class VehicleSmoother {
 	
 	public VehicleSmoother(Vehicle vehicle) {
 		this.vehicle = vehicle;
+		location = vehicle.getLocation();
+		bearing = vehicle.getBearing();
 		stateHistory = new ArrayList<NavigationState>();
 		startUpdateTask();
 	}

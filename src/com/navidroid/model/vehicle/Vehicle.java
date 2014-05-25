@@ -51,6 +51,10 @@ public class Vehicle {
 		return location;
 	}
 	
+	public double getBearing() {
+		return bearing;
+	}
+	
 	public Bitmap getImage() {
 		return image;
 	}

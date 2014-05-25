@@ -25,7 +25,6 @@ public class InternalNavigator implements INavigator {
 	private final int MAX_TIME_OFF_PATH_MS = 3000;
 	
 	private NavigationMap map;
-	private Vehicle vehicle;
 	private VehicleSmoother vehicleSmoother;
 	private IGps gps;
 	private IDirectionsFactory directionsFactory;
@@ -41,7 +40,6 @@ public class InternalNavigator implements INavigator {
 	public InternalNavigator(NavigationFragment navigationFragment, IGps gps, NavigationMap map, Vehicle vehicle, IDirectionsFactory directionsFactory) {
 		this.gps = gps;
 		this.map = map;
-		this.vehicle = vehicle;
 		this.directionsFactory = directionsFactory;
 		
 		vehicleSmoother = new VehicleSmoother(vehicle);
@@ -188,18 +186,14 @@ public class InternalNavigator implements INavigator {
 				
 				if (!lastNavigationStateSnapshot.isNavigating() || !lastNavigationStateSnapshot.isHeadingOffPath()) {
 					// Last time we checked, we werern't navigating or we weren't heading off path.
-					navigationState.signalHeadingOffPath();
-					Log.e("navidroid", "Signal heading off path");
 				} else if (navigationStateSnapshot.isOnPath() &&
 					navigationStateSnapshot.getTime() - navigationStateSnapshot.getHeadingOffPathStartTime() > MAX_TIME_OFF_PATH_MS) {
 					// We have been off path for the tolerance time and not yet signalled so.
-					Log.e("navidroid", "Signal off path");
 					navigationState.signalOffPath();
 					navigatorStateListener.OnVehicleOffPath(navigationState);
 				}
 				
 			} else if (lastNavigationStateSnapshot != null && lastNavigationStateSnapshot.isHeadingOffPath()) { // We are back on path.
-				Log.e("navidroid", "Signal back on path");
 				navigationState.signalOnPath();
 			}
 			
