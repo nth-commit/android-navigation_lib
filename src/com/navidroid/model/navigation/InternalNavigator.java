@@ -4,8 +4,10 @@ import android.util.Log;
 
 import com.navidroid.NavigationFragment;
 import com.navidroid.model.LatLng;
+import com.navidroid.model.directions.Direction;
 import com.navidroid.model.directions.Directions;
 import com.navidroid.model.directions.IDirectionsFactory;
+import com.navidroid.model.directions.Movement;
 import com.navidroid.model.directions.Route;
 import com.navidroid.model.directions.Route.DirectionsRetrieved;
 import com.navidroid.model.map.NavigationMap;
@@ -34,6 +36,7 @@ public class InternalNavigator implements INavigator {
 	private NavigationState navigationStateSnapshot;
 	private NavigationState lastNavigationStateSnapshot;
 	private LatLng destination;
+	private boolean hasDeparted;
 	
 	private final Object navigatingLock = new Object();
 	
@@ -126,7 +129,8 @@ public class InternalNavigator implements INavigator {
 	private void beginNavigation(Directions directions, LatLng location) {
 		synchronized (navigatingLock) {
 			redirectNavigation(directions, location);
-			navigatorStateListener.OnDeparture(navigationState);
+			hasDeparted = false;
+			navigatorStateListener.OnNavigationStarted(navigationState);
 			assert navigationState.isNavigating();
 			if (gps instanceof AbstractSimulatedGps) {
 				((AbstractSimulatedGps)gps).followPath(directions.getLatLngPath());
@@ -171,16 +175,23 @@ public class InternalNavigator implements INavigator {
 	
 	private void checkDirectionChanged() {
 		if (navigationStateSnapshot.isNavigating()) {
-			if (!lastNavigationStateSnapshot.isNavigating()) {
+			Direction currentDirection = navigationStateSnapshot.getCurrentPoint().direction;
+			if (lastNavigationStateSnapshot == null ||
+					!lastNavigationStateSnapshot.isNavigating() ||
+					currentDirection != lastNavigationStateSnapshot.getCurrentPoint().direction) {
+			
 				navigatorStateListener.OnNewDirection(navigationStateSnapshot);
-			} else if (navigationStateSnapshot.getCurrentPoint().direction != lastNavigationStateSnapshot.getCurrentPoint().direction) {
-				navigatorStateListener.OnNewDirection(navigationStateSnapshot);
+				
+				if (!hasDeparted && currentDirection.getMovement() != Movement.DEPARTURE) {
+					hasDeparted = true;
+					navigatorStateListener.OnDeparture(navigationStateSnapshot);
+				}
 			}
 		}
 	}
 	
 	private void checkOffPath() {
-		if (navigationStateSnapshot.isNavigating()) {
+		if (navigationStateSnapshot.isNavigating() && hasDeparted) {
 			if (navigationStateSnapshot.getDistanceOffPath() > OFF_PATH_TOLERANCE_METERS ||
 				navigationStateSnapshot.getBearingDifferenceFromPath() > OFF_PATH_TOLERANCE_BEARING) {
 				
@@ -196,7 +207,6 @@ public class InternalNavigator implements INavigator {
 			} else if (lastNavigationStateSnapshot != null && lastNavigationStateSnapshot.isHeadingOffPath()) { // We are back on path.
 				navigationState.signalOnPath();
 			}
-			
 		}
 	}
 }

@@ -35,13 +35,13 @@ public class DefaultNavigatorStateListener implements INavigatorStateListener {
 	}
 	
 	@Override
-	public void OnNewPathFoundFailed(Exception e, LatLng origin, LatLng destination) {
+	public void OnNewPathFoundFailed(Exception e, LatLng origin, final LatLng destination) {
 		Context context = fragment.getView().getContext();
 		Toast.makeText(context, "Directions request failed", Toast.LENGTH_SHORT).show();
 		handler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				fragment.getNavigator().reroute();
+				fragment.getNavigator().go(destination);
 			}
 		}, DIRECTIONS_REREQUEST_BACKOFF_MS);
 	}
@@ -49,10 +49,14 @@ public class DefaultNavigatorStateListener implements INavigatorStateListener {
 	@Override
 	public void OnNewPathFound(Directions directions, LatLng origin, LatLng destination) {
 	}
+	
+	@Override
+	public void OnNavigationStarted(NavigationState state) {
+		addDirectionsOverlay();
+	}
 
 	@Override
 	public void OnDeparture(NavigationState state) {
-		addDirectionsOverlay();
 	}
 
 	@Override

@@ -9,6 +9,8 @@ public interface INavigatorStateListener {
 	
 	void OnNewPathFound(Directions directions, LatLng origin, LatLng destination);
 	
+	void OnNavigationStarted(NavigationState state);
+	
 	void OnDeparture(NavigationState state);
 	
 	void OnArrival(NavigationState state);
