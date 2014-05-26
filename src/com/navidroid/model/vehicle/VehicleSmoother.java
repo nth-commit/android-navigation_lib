@@ -123,7 +123,7 @@ public class VehicleSmoother {
 			return;
 		}
 		
-		if (a.hasDeparted() && b.hasDeparted()) { // TODO: hasDeparted && !hasArrived
+		if (a.hasDeparted() && !a.hasArrived() && b.hasDeparted() && !b.hasArrived()) {
 			calculatePositionOnPath(time, a, b);
 		} else {
 			calculatePositionOffPath(time, a, b);

@@ -25,6 +25,7 @@ public class MutableNavigationState extends NavigationState {
 	
 	public void startNavigation(Directions directions) {
 		hasDeparted = false;
+		hasArrived = false;
 		redirectNavigation(directions);
 	}
 	
@@ -44,6 +45,7 @@ public class MutableNavigationState extends NavigationState {
 		distanceOffPath = 0;
 		bearingOnPath = 0;
 		bearingDifferenceFromPath = 0;
+		hasArrived = true;
 	}
 
 	public void signalOnPath() {
@@ -68,6 +70,11 @@ public class MutableNavigationState extends NavigationState {
 	public void signalHasStartedFollowingDirections() {
 		hasStartedFollowingDirections = true;
 		assert hasDeparted();
+	}
+	
+	public void signalHasArrived() {
+		assert hasDeparted();
+		hasArrived = true;
 	}
 	
 	public NavigationState getSnapshot() {

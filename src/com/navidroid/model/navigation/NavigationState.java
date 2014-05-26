@@ -25,6 +25,7 @@ public class NavigationState {
 	protected long headingOffPathStartTime;
 	protected boolean hasDeparted;
 	protected boolean hasStartedFollowingDirections;
+	protected boolean hasArrived;
 	
 	public NavigationState() { }
 	
@@ -43,6 +44,8 @@ public class NavigationState {
 		this.isOnPath = navigationStateSnapshot.isOnPath;
 		this.headingOffPathStartTime = navigationStateSnapshot.headingOffPathStartTime;
 		this.hasDeparted = navigationStateSnapshot.hasDeparted;
+		this.hasStartedFollowingDirections = navigationStateSnapshot.hasStartedFollowingDirections;
+		this.hasArrived = navigationStateSnapshot.hasArrived;
 	}
 	
 	public Point getCurrentPoint() {
@@ -173,5 +176,9 @@ public class NavigationState {
 	
 	public boolean hasStartedFollowingDirections() {
 		return hasStartedFollowingDirections;
+	}
+	
+	public boolean hasArrived() {
+		return hasArrived;
 	}
 }
