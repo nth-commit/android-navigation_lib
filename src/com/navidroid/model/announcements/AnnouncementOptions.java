@@ -2,7 +2,7 @@ package com.navidroid.model.announcements;
 
 public class AnnouncementOptions {
 	
-	private int[] times = new int[] { 20, 60, 300 };
+	private int[] times = new int[] { 30, 60, 300 };
 	
 	public AnnouncementOptions times(int... times) {
 		this.times = times;

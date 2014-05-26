@@ -17,7 +17,7 @@ import android.util.Log;
 
 public class Announcer {
 	
-	private final static int MAX_TIME_WINDOW_TO_ANNOUNCE_S = 5;
+	private final static int MAX_TIME_WINDOW_TO_ANNOUNCE_S = 3;
 	private final static int NEXT_DIRECTION_CLOSE_TIME_S = 5;
 	
 	private Hashtable<Direction, AnnouncementGroup> announcementGroups;
@@ -33,8 +33,6 @@ public class Announcer {
 					int result = tts.setLanguage(Locale.US);
 					if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
 						onInitialisationFailed();
-					} else {
-						announce("Text to speech initialised!");
 					}
 				} else {
 					onInitialisationFailed();
@@ -72,7 +70,13 @@ public class Announcer {
 		AnnouncementGroup announcementGroup = getAnnouncementGroup(currentDirection);
 		if (!announcementGroup.hasAnnouncedOnDirection()) {
 			announcementGroup.signalAnnouncedOnDirection();
-			announce(currentDirection.getMovementDescription() + " then " + nextDirection.getDescription());
+			String announcement = currentDirection.getMovementDescription() + " then ";
+			if (nextDirection.getMovement() == Movement.ARRIVAL) {
+				announcement += getDestinationInString(nextDirection.getDistanceInMeters());
+			} else {
+				announcement += nextDirection.getDescription();
+			}
+			announce(announcement);
 		}
 	}
 	
@@ -106,15 +110,21 @@ public class Announcer {
 	}
 
 	private void announceUpcomingDirection(NavigationState navigationState) {
-		String announcement = "In ";
-		announcement += DistanceFormatter.formatMeters(navigationState.getDistanceToCurrentDirection(), true);
-		announcement += " " + navigationState.getCurrentPoint().direction.getShortDescription();
-		if (navigationState.getTimeToNextDirection() < NEXT_DIRECTION_CLOSE_TIME_S) {
-			String movementString = getMovementString(navigationState.getCurrentPoint().nextDirection.getMovement());
-			if (!movementString.equals("")) {
-				announcement += " then " + movementString;
+		Direction direction = navigationState.getCurrentDirection();
+		String announcement;
+		if (direction.getMovement() == Movement.ARRIVAL) {
+			announcement = getDestinationInString(direction.getDistanceInMeters());
+		} else {
+			announcement = "In ";
+			announcement += DistanceFormatter.formatMeters(navigationState.getDistanceToCurrentDirection(), true);
+			announcement += " " + navigationState.getCurrentPoint().direction.getShortDescription();
+			if (navigationState.getTimeToNextDirection() < NEXT_DIRECTION_CLOSE_TIME_S) {
+				String movementString = getMovementString(navigationState.getNextDirection().getMovement());
+				if (!movementString.equals("")) {
+					announcement += " then " + movementString;
+				}
 			}
-		}		
+		}
 		announce(announcement);
 	}
 	
@@ -132,5 +142,9 @@ public class Announcer {
 			default:
 				return "";
 		}
+	}
+	
+	private String getDestinationInString(int meters) {
+		return "your destination is in " + DistanceFormatter.formatMeters(meters, true);
 	}
 }
