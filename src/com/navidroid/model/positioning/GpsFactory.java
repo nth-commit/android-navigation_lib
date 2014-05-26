@@ -13,9 +13,9 @@ public class GpsFactory {
 	public static IGps create(GpsOptions options, LocationClient locationClient) {
 		if (options.gpsType() == GpsType.SIMULATED) {
 			if (options.simulatedGpsOptions().debugMode()) {
-				return new DebugSimulatedGps(options, Defaults.LOCATION);
+				return new DebugSimulatedGps(options);
 			} else {
-				return new SimulatedGps(options, Defaults.LOCATION);
+				return new SimulatedGps(options);
 			}
 		} else {
 			return new Gps(options, locationClient);

@@ -4,8 +4,8 @@ import com.navidroid.model.LatLng;
 
 public class DebugSimulatedGps extends AbstractSimulatedGps {
 	
-	public DebugSimulatedGps(GpsOptions options, LatLng location) {
-		super(options, location);
+	public DebugSimulatedGps(GpsOptions options) {
+		super(options);
 	}
 
 	@Override

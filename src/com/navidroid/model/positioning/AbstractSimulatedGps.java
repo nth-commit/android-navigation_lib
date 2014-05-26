@@ -30,12 +30,12 @@ public abstract class AbstractSimulatedGps extends AbstractGps {
 	private int delayBeforePathFollow;
 	private long startFollowTime;
 	
-	public AbstractSimulatedGps(GpsOptions options, LatLng location) {
+	public AbstractSimulatedGps(GpsOptions options) {
 		super(options);
 		customPath = options.simulatedGpsOptions().simulatedPath();
 		simulateError = options.simulatedGpsOptions().simulateError();
 		delayBeforePathFollow = options.simulatedGpsOptions().delayBeforePathFollow();
-		currentPosition = new Position(location, 0, System.currentTimeMillis());
+		currentPosition = new Position(options.simulatedGpsOptions().simulatedLocation(), 0, System.currentTimeMillis());
 	}
 
 	public void followPath(List<LatLng> path) {

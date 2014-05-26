@@ -119,7 +119,7 @@ public class Announcer {
 		Direction direction = navigationState.getCurrentDirection();
 		String announcement;
 		if (direction.getMovement() == Movement.ARRIVAL) {
-			announcement = getDestinationInString(direction.getDistanceInMeters());
+			announcement = getDestinationInString((int)navigationState.getDistanceToCurrentDirection());
 		} else {
 			announcement = "In ";
 			announcement += DistanceFormatter.formatMeters(navigationState.getDistanceToCurrentDirection(), true);

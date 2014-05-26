@@ -7,8 +7,8 @@ import com.navidroid.model.util.AsyncTaskExecutor;
 
 public class SimulatedGps extends AbstractSimulatedGps {
 	
-	public SimulatedGps(GpsOptions options, LatLng location) {
-		super(options, location);
+	public SimulatedGps(GpsOptions options) {
+		super(options);
 	}
 	
 	@Override

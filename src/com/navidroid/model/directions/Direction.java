@@ -73,6 +73,9 @@ public class Direction {
 			case TURN_LEFT:
 				movementDescription = "turn left";
 				break;
+			case CONTINUE:
+				movementDescription = description;
+				break;
 			default:
 				movementDescription = "";
 				break;
