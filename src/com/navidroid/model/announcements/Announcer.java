@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.navidroid.NavigationFragment;
+import com.navidroid.R;
 import com.navidroid.model.directions.Direction;
 import com.navidroid.model.directions.Directions;
 import com.navidroid.model.directions.DistanceFormatter;
@@ -50,6 +51,11 @@ public class Announcer {
 	}
 	
 	public void startNavigation(Directions directions) {
+		setupAnnouncementHistory(directions);
+		announceDeparture(directions);
+	}
+	
+	private void setupAnnouncementHistory(Directions directions) {
 		hasAnnounced = new Hashtable<Direction, boolean[]>();
 		List<Direction> directionsList = directions.getDirectionsList(); 
 		for (int i = 0; i < directionsList.size(); i++) {
@@ -61,16 +67,16 @@ public class Announcer {
 		}
 	}
 	
-	public void announceDeparture() {
-		
+	private void announceDeparture(Directions directions) {
+		tts.speak(directions.getOriginAddress(), TextToSpeech.QUEUE_ADD, null);
 	}
 
 	public void announceMovement(Direction direction) {
-		tts.speak(getMovementString(direction.getMovement()), TextToSpeech.QUEUE_FLUSH, null);
+		tts.speak(getMovementString(direction.getMovement()), TextToSpeech.QUEUE_ADD, null);
 	}
 	
 	public void announceDirection(Direction direction) {
-		tts.speak(direction.getText(), TextToSpeech.QUEUE_FLUSH, null);
+		tts.speak(direction.getText(), TextToSpeech.QUEUE_ADD, null);
 	}
 	
 	public void checkAnnounceUpcomingDirection(NavigationState navigationState) {
@@ -97,17 +103,24 @@ public class Announcer {
 	private void announceUpcomingDirection(NavigationState navigationState) {
 		String announcement = "In ";
 		announcement += DistanceFormatter.formatMeters(navigationState.getDistanceToCurrentDirection(), true);
-		announcement += " " + getMovementString(navigationState.getCurrentPoint().direction.getMovement());
+		announcement += " " + navigationState.getCurrentPoint().direction.getText();
 		if (navigationState.getTimeToNextDirection() < NEXT_DIRECTION_CLOSE_TIME_S) {
-			announcement += " then " + getMovementString(navigationState.getCurrentPoint().nextDirection.getMovement());
+			String movementString = getMovementString(navigationState.getCurrentPoint().nextDirection.getMovement());
+			if (!movementString.equals("")) {
+				announcement += " then " + movementString;
+			}
 		}		
-		tts.speak(announcement, TextToSpeech.QUEUE_FLUSH, null);
+		tts.speak(announcement, TextToSpeech.QUEUE_ADD, null);
 	}
 
 	private String getMovementString(Movement movement) {
-		return "Turn right";
+		switch (movement) {
+			case TURN_RIGHT:
+				return "turn right";
+			case TURN_LEFT:
+				return "turn left";
+			default:
+				return "";
+		}
 	}
-	
-	
-	
 }
