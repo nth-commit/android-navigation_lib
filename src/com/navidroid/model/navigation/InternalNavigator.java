@@ -179,7 +179,7 @@ public class InternalNavigator implements INavigator {
 			if (currentDirection.getMovement() != Movement.DEPARTURE) {
 				
 				if (!navigationStateSnapshot.hasDeparted()) {
-					announcer.announceDeparture(navigationStateSnapshot.getDirections().getDirectionsList().get(0), currentDirection);
+					announcer.announceDirectionAfterDeparture(currentDirection);
 					navigationState.signalHasDeparted();
 					navigatorStateListener.OnDeparture(navigationStateSnapshot);
 				}

@@ -135,6 +135,14 @@ public class Directions {
 		return directions;
 	}
 	
+	public Direction getDepartureDirection() {
+		return directions.get(0);
+	}
+	
+	public Direction getArrivalDirection() {
+		return directions.get(directions.size() - 1);
+	}
+	
 	public List<Point> getPath() {
 		return path;
 	}
