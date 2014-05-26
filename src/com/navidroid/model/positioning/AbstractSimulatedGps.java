@@ -26,13 +26,15 @@ public abstract class AbstractSimulatedGps extends AbstractGps {
 	protected List<LatLng> customPath;
 	
 	private Object currentPathLock = new Object();
-	
 	private boolean simulateError;
+	private int delayBeforePathFollow;
+	private long startFollowTime;
 	
 	public AbstractSimulatedGps(GpsOptions options, LatLng location) {
 		super(options);
 		customPath = options.simulatedGpsOptions().simulatedPath();
 		simulateError = options.simulatedGpsOptions().simulateError();
+		delayBeforePathFollow = options.simulatedGpsOptions().delayBeforePathFollow();
 		currentPosition = new Position(location, 0, System.currentTimeMillis());
 	}
 
@@ -44,6 +46,7 @@ public abstract class AbstractSimulatedGps extends AbstractGps {
 				currentPath = customPath;
 			}
 		}
+		startFollowTime = System.currentTimeMillis() + delayBeforePathFollow;
 		doFollowPath();
 	}
 	
@@ -75,7 +78,7 @@ public abstract class AbstractSimulatedGps extends AbstractGps {
 	}
 	
 	protected void advancePosition(List<LatLng> path, long toTime) {
-		long timePassedMillisconds = toTime - currentPosition.timestamp;
+		long timePassedMillisconds = toTime >= startFollowTime ? toTime - currentPosition.timestamp : 0;
 		double distanceRemaining = (timePassedMillisconds / S_TO_MS) * SPEED_LIMIT_MPS;
 		LatLng currentLocation = currentPosition.location;
 		double currentBearing = 0;

@@ -11,6 +11,7 @@ public class SimulatedGpsOptions {
 	private LatLng simulatedLocation = Defaults.LOCATION;
 	private List<LatLng> simulatedPath;
 	private boolean simulateError = false;
+	private int delayBeforePathFollow = 0;
 	
 	public SimulatedGpsOptions simulatedLocation(LatLng simulatedLocation) {
 		this.simulatedLocation = simulatedLocation;
@@ -46,5 +47,14 @@ public class SimulatedGpsOptions {
 	
 	public boolean simulateError() {
 		return simulateError;
+	}
+	
+	public SimulatedGpsOptions delayBeforePathFollow(int delayBeforePathFollow) {
+		this.delayBeforePathFollow = delayBeforePathFollow;
+		return this;
+	}
+	
+	public int delayBeforePathFollow() {
+		return delayBeforePathFollow;
 	}
 }
