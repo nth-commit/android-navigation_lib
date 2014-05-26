@@ -29,6 +29,7 @@ public class MutableNavigationState extends NavigationState {
 	}
 	
 	public void redirectNavigation(Directions directions) {
+		this.directions = directions;
 		path = directions.getPath();
 		currentPoint = path.get(0);
 		isHeadingOffPath = false;

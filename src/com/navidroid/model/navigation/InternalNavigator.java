@@ -149,7 +149,6 @@ public class InternalNavigator implements INavigator {
 			announcer.startNavigation(directions);
 			destination = location;
 			map.addPathPolyline(directions.getLatLngPath());
-			
 		}
 	}
 	
@@ -176,8 +175,11 @@ public class InternalNavigator implements INavigator {
 	
 	private void checkDeparted() {
 		if (navigationStateSnapshot.isNavigating()) {
-			if (navigationStateSnapshot.getCurrentDirection().getMovement() != Movement.DEPARTURE) {
+			Direction currentDirection = navigationStateSnapshot.getCurrentDirection();
+			if (currentDirection.getMovement() != Movement.DEPARTURE) {
+				
 				if (!navigationStateSnapshot.hasDeparted()) {
+					announcer.announceDeparture(navigationStateSnapshot.getDirections().getDirectionsList().get(0), currentDirection);
 					navigationState.signalHasDeparted();
 					navigatorStateListener.OnDeparture(navigationStateSnapshot);
 				}

@@ -48,11 +48,6 @@ public class Announcer {
 	}
 	
 	public void startNavigation(Directions directions) {
-		setupAnnouncementHistory(directions);
-		announceDeparture(directions);
-	}
-	
-	private void setupAnnouncementHistory(Directions directions) {
 		announcementGroups = new Hashtable<Direction, AnnouncementGroup>();
 		List<Direction> directionsList = directions.getDirectionsList(); 
 		for (int i = 0; i < directionsList.size(); i++) {
@@ -60,8 +55,9 @@ public class Announcer {
 		}
 	}
 	
-	private void announceDeparture(Directions directions) {
-		announce(directions.getOriginAddress());
+	public void announceDeparture(Direction departureDirection, Direction nextDirection) {
+		assert departureDirection.getMovement() == Movement.DEPARTURE;
+		announce(departureDirection.getDescription() + " then " + nextDirection.getDescription());
 	}
 	
 	public void announceArrival() {

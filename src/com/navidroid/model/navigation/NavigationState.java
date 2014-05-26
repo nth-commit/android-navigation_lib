@@ -4,12 +4,14 @@ import java.util.List;
 
 import com.navidroid.model.LatLng;
 import com.navidroid.model.directions.Direction;
+import com.navidroid.model.directions.Directions;
 import com.navidroid.model.directions.Point;
 import com.navidroid.model.positioning.Position;
 
 public class NavigationState {
 	
 	protected List<Point> path;
+	protected Directions directions;
 	protected Position position;
 	protected LatLng locationOnPath;
 	protected double bearingOnPath;
@@ -28,6 +30,7 @@ public class NavigationState {
 	
 	protected NavigationState(NavigationState navigationStateSnapshot) {
 		this.path = navigationStateSnapshot.path;
+		this.directions = navigationStateSnapshot.directions;
 		this.position = navigationStateSnapshot.position;
 		this.locationOnPath = navigationStateSnapshot.locationOnPath;
 		this.bearingOnPath = navigationStateSnapshot.bearingOnPath;
@@ -39,6 +42,7 @@ public class NavigationState {
 		this.isHeadingOffPath = navigationStateSnapshot.isHeadingOffPath;
 		this.isOnPath = navigationStateSnapshot.isOnPath;
 		this.headingOffPathStartTime = navigationStateSnapshot.headingOffPathStartTime;
+		this.hasDeparted = navigationStateSnapshot.hasDeparted;
 	}
 	
 	public Point getCurrentPoint() {
@@ -87,6 +91,10 @@ public class NavigationState {
 	
 	public long getHeadingOffPathStartTime() {
 		return headingOffPathStartTime;
+	}
+	
+	public Directions getDirections() {
+		return directions;
 	}
 	
 	public Direction getCurrentDirection() {
