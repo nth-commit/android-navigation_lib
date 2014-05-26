@@ -22,6 +22,7 @@ import com.navidroid.model.vehicle.VehicleSmoother;
 
 public class InternalNavigator implements INavigator {
 	
+	private final int DIRECTION_ANNOUNCEMENT_TIME = 3;
 	private final int MIN_ARRIVAL_DIST_METERS = 10;
 	private final int OFF_PATH_TOLERANCE_METERS = 10;
 	private final int OFF_PATH_TOLERANCE_BEARING = 45;
@@ -159,10 +160,11 @@ public class InternalNavigator implements INavigator {
 			lastNavigationStateSnapshot = navigationStateSnapshot;
 			navigationStateSnapshot = navigationState.getSnapshot();
 			if (isNavigating()) {
+				checkDeparted();
 				checkArrival();
+				checkDirectionAnnouncements();
 				checkDirectionChanged();
 				checkOffPath();
-				announcer.checkAnnounceUpcomingDirection(navigationStateSnapshot);
 			}
 			
 			if (navigatorStateListener != null) {
@@ -172,33 +174,46 @@ public class InternalNavigator implements INavigator {
 		vehicleSmoother.update(navigationStateSnapshot);
 	}
 	
+	private void checkDeparted() {
+		if (navigationStateSnapshot.isNavigating()) {
+			if (navigationStateSnapshot.getCurrentDirection().getMovement() != Movement.DEPARTURE) {
+				if (!navigationStateSnapshot.hasDeparted()) {
+					navigationState.signalHasDeparted();
+					navigatorStateListener.OnDeparture(navigationStateSnapshot);
+				}
+				
+				if (!navigationStateSnapshot.hasStartedFollowingDirections()) {
+					navigationState.signalHasStartedFollowingDirections();
+				}
+			}
+		}
+	}
+	
 	private void checkArrival() {
 		if (LatLngUtil.distanceInMeters(navigationState.getLocation(), destination) <= MIN_ARRIVAL_DIST_METERS) {	
 			navigatorStateListener.OnArrival(navigationState);
+			announcer.announceArrival();
 			stop();
 		}
 	}
 	
-	private void checkDirectionChanged() {
+	private void checkDirectionAnnouncements() {
 		if (navigationStateSnapshot.isNavigating()) {
-			Direction currentDirection = navigationStateSnapshot.getCurrentPoint().direction;
-			if (lastNavigationStateSnapshot == null ||
-					!lastNavigationStateSnapshot.isNavigating() ||
-					currentDirection != lastNavigationStateSnapshot.getCurrentPoint().direction) {
-			
-				navigatorStateListener.OnNewDirection(navigationStateSnapshot);
-				announcer.announceDirection(currentDirection);
+			if (navigationStateSnapshot.getTimeToCurrentDirection() < DIRECTION_ANNOUNCEMENT_TIME &&
+					navigationStateSnapshot.getCurrentDirection().getMovement() != Movement.ARRIVAL) {
 				
-				if (currentDirection.getMovement() != Movement.DEPARTURE) {
-					if (!navigationStateSnapshot.hasDeparted()) {
-						navigationState.signalHasDeparted();
-						navigatorStateListener.OnDeparture(navigationStateSnapshot);
-					}
-					if (!navigationStateSnapshot.hasStartedFollowingDirections()) {
-						navigationState.signalHasStartedFollowingDirections();
-					}
-				}
+				announcer.announceDirectionChanged(navigationStateSnapshot.getCurrentDirection(), navigationState.getNextDirection());
 			}
+			announcer.checkAnnounceUpcomingDirection(navigationStateSnapshot);
+		}
+	}
+	
+	private void checkDirectionChanged() {
+		if (navigationStateSnapshot.isNavigating() &&
+				(lastNavigationStateSnapshot == null ||
+				!lastNavigationStateSnapshot.isNavigating() ||
+				navigationStateSnapshot.getCurrentDirection() != lastNavigationStateSnapshot.getCurrentDirection())) {
+			navigatorStateListener.OnNewDirection(navigationStateSnapshot);	
 		}
 	}
 	

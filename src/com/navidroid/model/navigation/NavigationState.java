@@ -3,6 +3,7 @@ package com.navidroid.model.navigation;
 import java.util.List;
 
 import com.navidroid.model.LatLng;
+import com.navidroid.model.directions.Direction;
 import com.navidroid.model.directions.Point;
 import com.navidroid.model.positioning.Position;
 
@@ -86,6 +87,14 @@ public class NavigationState {
 	
 	public long getHeadingOffPathStartTime() {
 		return headingOffPathStartTime;
+	}
+	
+	public Direction getCurrentDirection() {
+		return currentPoint == null ? null : currentPoint.direction; 
+	}
+	
+	public Direction getNextDirection() {
+		return currentPoint == null ? null : currentPoint.nextDirection;
 	}
 	
 	public double getDistanceToCurrentDirection() {
