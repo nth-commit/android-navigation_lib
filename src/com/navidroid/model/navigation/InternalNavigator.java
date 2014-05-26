@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.navidroid.NavigationFragment;
 import com.navidroid.model.LatLng;
+import com.navidroid.model.announcements.Announcer;
 import com.navidroid.model.directions.Direction;
 import com.navidroid.model.directions.Directions;
 import com.navidroid.model.directions.IDirectionsFactory;
@@ -29,6 +30,7 @@ public class InternalNavigator implements INavigator {
 	private NavigationMap map;
 	private VehicleSmoother vehicleSmoother;
 	private IGps gps;
+	private Announcer announcer;
 	private IDirectionsFactory directionsFactory;
 	private INavigatorStateListener navigatorStateListener;
 	private Position position;
@@ -39,10 +41,11 @@ public class InternalNavigator implements INavigator {
 	
 	private final Object navigatingLock = new Object();
 	
-	public InternalNavigator(NavigationFragment navigationFragment, IGps gps, NavigationMap map, Vehicle vehicle, IDirectionsFactory directionsFactory) {
+	public InternalNavigator(NavigationFragment navigationFragment, IGps gps, NavigationMap map, Vehicle vehicle, IDirectionsFactory directionsFactory, Announcer announcer) {
 		this.gps = gps;
 		this.map = map;
 		this.directionsFactory = directionsFactory;
+		this.announcer = announcer;
 		
 		vehicleSmoother = new VehicleSmoother(vehicle);
 		navigationState = new MutableNavigationState();
@@ -130,6 +133,7 @@ public class InternalNavigator implements INavigator {
 			map.addPathPolyline(directions.getLatLngPath());
 			map.followVehicle();
 			navigationState.startNavigation(directions);
+			announcer.startNavigation(directions);
 			navigatorStateListener.OnNavigationStarted(navigationState);
 			assert navigationState.isNavigating();
 			if (gps instanceof AbstractSimulatedGps) {
@@ -141,6 +145,7 @@ public class InternalNavigator implements INavigator {
 	private void redirectNavigation(Directions directions, LatLng location) {
 		synchronized (navigatingLock) {
 			navigationState.redirectNavigation(directions);
+			announcer.startNavigation(directions);
 			destination = location;
 			map.addPathPolyline(directions.getLatLngPath());
 			
@@ -157,6 +162,7 @@ public class InternalNavigator implements INavigator {
 				checkArrival();
 				checkDirectionChanged();
 				checkOffPath();
+				announcer.checkAnnounceUpcomingDirection(navigationStateSnapshot);
 			}
 			
 			if (navigatorStateListener != null) {
@@ -181,6 +187,8 @@ public class InternalNavigator implements INavigator {
 					currentDirection != lastNavigationStateSnapshot.getCurrentPoint().direction) {
 			
 				navigatorStateListener.OnNewDirection(navigationStateSnapshot);
+				announcer.announceDirection(currentDirection);
+				
 				if (currentDirection.getMovement() != Movement.DEPARTURE) {
 					if (!navigationStateSnapshot.hasDeparted()) {
 						navigationState.signalHasDeparted();

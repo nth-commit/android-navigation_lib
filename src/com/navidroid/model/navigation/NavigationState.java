@@ -97,6 +97,15 @@ public class NavigationState {
 		return nextPoint == null ? 0 : distanceToNextPoint + nextPoint.distanceToCurrentDirectionMeters;
 	}
 	
+	public double getDistanceToNextDirection() {
+		if (!isNavigating()) {
+			return 0;
+		}
+		
+		Point nextPoint = currentPoint.next;
+		return nextPoint == null ? 0 : distanceToNextPoint + nextPoint.distanceToNextDirectionMeters;
+	}
+	
 	public double getDistanceToArrival() {
 		if (!isNavigating()) {
 			return 0;
@@ -113,6 +122,16 @@ public class NavigationState {
 		
 		Point nextPoint = currentPoint.next;
 		double timeFromNextPoint = nextPoint == null ? 0 : nextPoint.timeToCurrentDirectionSeconds;
+		return progressAlongSegment * currentPoint.timeToCurrentDirectionSeconds + timeFromNextPoint;
+	}
+	
+	public double getTimeToNextDirection() {
+		if (!isNavigating()) {
+			return 0;
+		}
+		
+		Point nextPoint = currentPoint.next;
+		double timeFromNextPoint = nextPoint == null ? 0 : nextPoint.timeToNextDirectionSeconds;
 		return progressAlongSegment * currentPoint.timeToCurrentDirectionSeconds + timeFromNextPoint;
 	}
 	

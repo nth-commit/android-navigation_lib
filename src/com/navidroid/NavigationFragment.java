@@ -8,6 +8,8 @@ import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallback
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationClient;
 import com.navidroid.R;
+import com.navidroid.model.announcements.AnnouncementOptions;
+import com.navidroid.model.announcements.Announcer;
 import com.navidroid.model.directions.IDirectionsFactory;
 import com.navidroid.model.map.IMap;
 import com.navidroid.model.map.IMapFactory;
@@ -26,6 +28,7 @@ import com.navidroid.model.vehicle.Vehicle;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.IntentSender.SendIntentException;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,6 +84,7 @@ public class NavigationFragment extends Fragment implements
 	private LocationClient locationClient;
 	private NavigationMap navigationMap;
 	private Vehicle vehicle;
+	private Announcer announcer;
 	private IGps gps;
 	
 	@Override
@@ -90,6 +94,10 @@ public class NavigationFragment extends Fragment implements
 		mapFactory = mapFactorysById.get(id);
 		vehicleMarkerFactory = vehicleMarkerFactorysById.get(id);
 		options = optionsById.get(id);
+		
+		parent = getActivity();
+		parent.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		
 		super.onCreate(savedInstanceState);
 	}
 	
@@ -99,12 +107,12 @@ public class NavigationFragment extends Fragment implements
 	}
 	
 	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
+	public void onActivityCreated(Bundle savedInstanceState) {		
 		IMap map = mapFactory.createMap(this);
 		navigationMap = new NavigationMap(map, options.mapOptions());
+		announcer = new Announcer(this, options.announcementOptions());
 		
 		if (options.gpsOptions().gpsType() == GpsType.REAL) {
-			parent = getActivity();
 			locationClient = new LocationClient(parent, this, this);
 			locationClient.connect();
 		} else {
@@ -145,7 +153,7 @@ public class NavigationFragment extends Fragment implements
 	
 	private void createNavigator() {
 		vehicle = new Vehicle(this, vehicleMarkerFactory, navigationMap, options.vehicleOptions().location(gps.getLastLocation()));
-		internalNavigator = new InternalNavigator(this, gps, navigationMap, vehicle, directionsFactory);
+		internalNavigator = new InternalNavigator(this, gps, navigationMap, vehicle, directionsFactory, announcer);
 		INavigatorStateListener stateListener = options.navigationStateListenerFactory().createNavigatorStateListener(this);
 		internalNavigator.setNavigatorStateListener(stateListener);
 		navigator.setInternalNavigator(internalNavigator);
