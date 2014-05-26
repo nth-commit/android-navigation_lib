@@ -203,7 +203,6 @@ public class InternalNavigator implements INavigator {
 		if (navigationStateSnapshot.isNavigating()) {
 			if (navigationStateSnapshot.getTimeToCurrentDirection() < DIRECTION_ANNOUNCEMENT_TIME &&
 					navigationStateSnapshot.getCurrentDirection().getMovement() != Movement.ARRIVAL) {
-				
 				announcer.announceDirectionChanged(navigationStateSnapshot.getCurrentDirection(), navigationState.getNextDirection());
 			}
 			announcer.checkAnnounceUpcomingDirection(navigationStateSnapshot);

@@ -19,10 +19,12 @@ public class Announcer {
 	
 	private final static int MAX_TIME_WINDOW_TO_ANNOUNCE_S = 3;
 	private final static int NEXT_DIRECTION_CLOSE_TIME_S = 5;
+	private final static int TIME_ANNOUNCMENTS_MIN_WAIT_TIME_MS = 10000;
 	
 	private Hashtable<Direction, AnnouncementGroup> announcementGroups;
 	private int[] preAnnouncementTimes;
 	private TextToSpeech tts;
+	private long lastAnnouncementTime;
 	
 	public Announcer(NavigationFragment fragment, AnnouncementOptions options) {
 		preAnnouncementTimes = options.times();
@@ -81,6 +83,10 @@ public class Announcer {
 	}
 	
 	public void checkAnnounceUpcomingDirection(NavigationState navigationState) {
+		if (lastAnnouncementTime + TIME_ANNOUNCMENTS_MIN_WAIT_TIME_MS > System.currentTimeMillis()) {
+			return;
+		}
+		
 		double timeToDirection = navigationState.getTimeToCurrentDirection();
 		int announcementTime = -1;
 		for (int i = 0; i < preAnnouncementTimes.length; i++) {
@@ -130,6 +136,7 @@ public class Announcer {
 	
 	private void announce(String text) {
 		Log.i("com.navidroid", "Announcer: " + text);
+		lastAnnouncementTime = System.currentTimeMillis();
 		tts.speak(text, TextToSpeech.QUEUE_ADD, null);
 	}
 
