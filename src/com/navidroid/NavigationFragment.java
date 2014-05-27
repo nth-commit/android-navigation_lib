@@ -13,7 +13,6 @@ import com.navidroid.model.announcements.Announcer;
 import com.navidroid.model.directions.IDirectionsFactory;
 import com.navidroid.model.map.IMap;
 import com.navidroid.model.map.IMapFactory;
-import com.navidroid.model.map.Map;
 import com.navidroid.model.map.NavigationMap;
 import com.navidroid.model.navigation.DefaultNavigatorStateListener;
 import com.navidroid.model.navigation.INavigatorStateListener;
@@ -74,7 +73,6 @@ public class NavigationFragment extends Fragment implements
 	}
 	
 	private Navigator navigator = new Navigator();
-	private Map map = new Map();
 	
 	private IDirectionsFactory directionsFactory;
 	private IMapFactory mapFactory;
@@ -109,8 +107,8 @@ public class NavigationFragment extends Fragment implements
 	}
 	
 	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		map.setInnerObject(mapFactory.createMap(this));
+	public void onActivityCreated(Bundle savedInstanceState) {		
+		IMap map = mapFactory.createMap(this);
 		navigationMap = new NavigationMap(map, options.mapOptions());
 		announcer = new Announcer(this, options.announcementOptions());
 		
@@ -149,20 +147,16 @@ public class NavigationFragment extends Fragment implements
 		// TODO Auto-generated method stub
 	}
 	
+	public Navigator getNavigator() {
+		return navigator;
+	}
+	
 	private void createNavigator() {
 		vehicle = new Vehicle(this, vehicleMarkerFactory, navigationMap, options.vehicleOptions().location(gps.getLastLocation()));
 		internalNavigator = new InternalNavigator(this, gps, navigationMap, vehicle, directionsFactory, announcer);
 		INavigatorStateListener stateListener = options.navigationStateListenerFactory().createNavigatorStateListener(this);
 		internalNavigator.setNavigatorStateListener(stateListener);
 		navigator.setInnerObject(internalNavigator);
-	}
-	
-	public Navigator getNavigator() {
-		return navigator;
-	}
-	
-	public Map getMap() {
-		return map;
 	}
 }
 
