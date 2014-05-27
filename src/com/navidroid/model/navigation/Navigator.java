@@ -1,81 +1,57 @@
 package com.navidroid.model.navigation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.navidroid.model.LatLng;
+import com.navidroid.model.WhenReadyWrapper;
 
-/**
- * A lazy wrapper for the InternalNavigator class.
- * Stacks up callbacks and calls them, in-order,
- * so a user can do operations on a Navigator,
- * via NavigationFragment.getNavigator(), as soon
- * as the NavigationFragment is instantiated.
- */
-public class Navigator implements INavigator {
+public class Navigator extends WhenReadyWrapper<INavigator> implements INavigator {
 	
-	private interface WhenNavigatorReady {
-		void invoke(InternalNavigator navigator);
-	}
-	
-	private List<WhenNavigatorReady> callbacks;
-	private InternalNavigator navigator;
-	
-	public Navigator() {
-		callbacks = new ArrayList<WhenNavigatorReady>();
-	}
-	
-	public void setInternalNavigator(InternalNavigator navigator) {
-		this.navigator = navigator;
-		for (int i = 0; i < callbacks.size(); i++) {
-			callbacks.get(i).invoke(navigator);
-		}
-	}
-	
+	@Override
 	public void go(final LatLng location) {
-		if (navigator == null) {
-			callbacks.add(new WhenNavigatorReady() {
-				@Override
-				public void invoke(InternalNavigator navigator) {
-					navigator.go(location);
-				}
-			});
-		} else {
-			navigator.go(location);
-		}
+		whenReady(new WhenReady<INavigator>() {
+			@Override
+			public void invoke(INavigator object) {
+				object.go(location);
+			}
+		});
 	}
-	
+
+	@Override
 	public void stop() {
-		if (navigator == null) {
-			callbacks.add(new WhenNavigatorReady() {
-				@Override
-				public void invoke(InternalNavigator navigator) {
-					navigator.stop();
-				}
-			});
-		} else {
-			navigator.stop();
-		}
+		whenReady(new WhenReady<INavigator>() {
+			@Override
+			public void invoke(INavigator object) {
+				object.stop();
+			}
+		});
 	}
-	
+
+	@Override
 	public void reroute() {
-		if (navigator == null) {
-			callbacks.add(new WhenNavigatorReady() {
-				@Override
-				public void invoke(InternalNavigator navigator) {
-					navigator.reroute();
-				}
-			});
-		} else {
-			navigator.reroute();
-		}
+		whenReady(new WhenReady<INavigator>() {
+			@Override
+			public void invoke(INavigator object) {
+				object.reroute();
+			}
+		});
 	}
-	
+
+	@Override
 	public boolean isNavigating() {
-		return navigator == null ? false : navigator.isNavigating();
+		return whenReadyReturn(new WhenReadyReturn<INavigator, Boolean>() {
+			@Override
+			public Boolean invoke(INavigator object) {
+				return object.isNavigating();
+			}
+		}, false);
 	}
-	
+
+	@Override
 	public LatLng getDestination() {
-		return navigator == null ? null : navigator.getDestination();
+		return whenReadyReturn(new WhenReadyReturn<INavigator, LatLng>() {
+			@Override
+			public LatLng invoke(INavigator object) {
+				return object.getDestination();
+			}
+		}, null);
 	}
 }

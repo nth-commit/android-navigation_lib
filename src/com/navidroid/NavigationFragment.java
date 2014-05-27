@@ -156,7 +156,7 @@ public class NavigationFragment extends Fragment implements
 		internalNavigator = new InternalNavigator(this, gps, navigationMap, vehicle, directionsFactory, announcer);
 		INavigatorStateListener stateListener = options.navigationStateListenerFactory().createNavigatorStateListener(this);
 		internalNavigator.setNavigatorStateListener(stateListener);
-		navigator.setInternalNavigator(internalNavigator);
+		navigator.setInnerObject(internalNavigator);
 	}
 }
 
