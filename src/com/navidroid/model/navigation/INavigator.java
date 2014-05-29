@@ -14,4 +14,6 @@ public interface INavigator {
 	
 	LatLng getDestination();
 	
+	LatLng getLocation();
+	
 }

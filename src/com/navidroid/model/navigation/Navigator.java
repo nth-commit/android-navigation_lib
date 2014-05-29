@@ -54,4 +54,14 @@ public class Navigator extends WhenReadyWrapper<INavigator> implements INavigato
 			}
 		}, null);
 	}
+
+	@Override
+	public LatLng getLocation() {
+		return whenReadyReturn(new WhenReadyReturn<INavigator, LatLng>() {
+			@Override
+			public LatLng invoke(INavigator object) {
+				return object.getLocation();
+			}
+		}, null);
+	}
 }

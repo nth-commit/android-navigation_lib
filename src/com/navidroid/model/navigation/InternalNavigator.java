@@ -128,6 +128,12 @@ public class InternalNavigator implements INavigator {
 		}
 	}
 	
+	public LatLng getLocation() {
+		synchronized (navigatingLock) {
+			return navigationStateSnapshot.getLocation();
+		}
+	}
+	
 	private void beginNavigation(Directions directions, LatLng location) {
 		synchronized (navigatingLock) {
 			destination = location;
