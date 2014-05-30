@@ -15,10 +15,14 @@ public class ImageFactory {
 			case DEPARTURE:
 				return R.drawable.depart_87ceeb;
 			case CONTINUE:
+			case VEER_LEFT:
+			case VEER_RIGHT:
 				return R.drawable.continue_87ceeb;
 			case TURN_RIGHT:
+			case TURN_RIGHT_SHARP:
 				return R.drawable.turn_right_87ceeb;
 			case TURN_LEFT:
+			case TURN_LEFT_SHARP:
 				return R.drawable.turn_left_87ceeb;
 			default:
 				return 0;
