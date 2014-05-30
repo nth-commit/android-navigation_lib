@@ -36,8 +36,14 @@ public class DefaultNavigatorStateListener implements INavigatorStateListener {
 	
 	@Override
 	public void OnNewPathFoundFailed(Exception e, LatLng origin, final LatLng destination) {
-		Context context = fragment.getView().getContext();
-		Toast.makeText(context, "Directions request failed", Toast.LENGTH_SHORT).show();
+		final Context context = fragment.getView().getContext();
+		parentActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Toast.makeText(context, "Directions request failed", Toast.LENGTH_SHORT).show();
+			}
+		});
+		
 		handler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
