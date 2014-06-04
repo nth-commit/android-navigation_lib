@@ -3,7 +3,7 @@ package com.navidroid.model.navigation;
 import com.navidroid.model.LatLng;
 import com.navidroid.model.directions.Directions;
 
-public interface INavigatorStateListener {
+public interface INavigationStateListener {
 	
 	void OnNewPathFoundFailed(Exception e, LatLng origin, LatLng destination);
 	

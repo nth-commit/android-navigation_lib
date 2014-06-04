@@ -11,7 +11,7 @@ public class NavigationOptions {
 	private MapOptions mapOptions = new MapOptions();
 	private GpsOptions gpsOptions = new GpsOptions();
 	private AnnouncementOptions announcementOptions = new AnnouncementOptions();
-	private INavigatorStateListenerFactory navigationStateListenerFactory = new DefaultNavigatorStateListenerFactory();
+	private NavigationStateListenerOptions navigationStateListenerOptions = new NavigationStateListenerOptions();
 	
 	public NavigationOptions vehicleOptions(VehicleOptions options) {
 		vehicleOptions = options;
@@ -40,15 +40,6 @@ public class NavigationOptions {
 		return gpsOptions;
 	}
 	
-	public NavigationOptions navigationStateListenerFactory(INavigatorStateListenerFactory navigationStateListenerFactory) {
-		this.navigationStateListenerFactory = navigationStateListenerFactory;
-		return this;
-	}
-	
-	public INavigatorStateListenerFactory navigationStateListenerFactory() {
-		return navigationStateListenerFactory;
-	}
-	
 	public NavigationOptions announcementOptions(AnnouncementOptions options) {
 		announcementOptions = options;
 		return this;
@@ -56,5 +47,14 @@ public class NavigationOptions {
 	
 	public AnnouncementOptions announcementOptions() {
 		return announcementOptions;
+	}
+	
+	public NavigationOptions navigationStateListenerOptions(NavigationStateListenerOptions options) {
+		navigationStateListenerOptions = options;
+		return this;
+	}
+	
+	public NavigationStateListenerOptions navigationStateListenerOptions() {
+		return navigationStateListenerOptions;
 	}
 }

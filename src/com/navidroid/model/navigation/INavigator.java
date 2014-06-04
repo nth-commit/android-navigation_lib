@@ -16,4 +16,6 @@ public interface INavigator {
 	
 	LatLng getLocation();
 	
+	boolean hasGpsTicked();
+	
 }

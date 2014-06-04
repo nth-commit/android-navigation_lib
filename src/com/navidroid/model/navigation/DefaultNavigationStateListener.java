@@ -16,7 +16,7 @@ import com.navidroid.model.directions.Direction;
 import com.navidroid.model.directions.Directions;
 import com.navidroid.model.util.AsyncTaskExecutor;
 
-public class DefaultNavigatorStateListener implements INavigatorStateListener {
+public class DefaultNavigationStateListener implements INavigationStateListener {
 	
 	private static final int DIRECTIONS_REREQUEST_BACKOFF_MS = 5000;
 	
@@ -27,7 +27,7 @@ public class DefaultNavigatorStateListener implements INavigatorStateListener {
 	private Navigator navigator;
 	private Handler handler = new Handler();
 	
-	public DefaultNavigatorStateListener(NavigationFragment fragment) {
+	public DefaultNavigationStateListener(NavigationFragment fragment) {
 		this.fragment = fragment;
 		parentActivity = fragment.getActivity();
 		navigator = fragment.getNavigator();

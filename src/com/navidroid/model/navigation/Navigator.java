@@ -64,4 +64,14 @@ public class Navigator extends WhenReadyWrapper<INavigator> implements INavigato
 			}
 		}, null);
 	}
+
+	@Override
+	public boolean hasGpsTicked() {
+		return whenReadyReturn(new WhenReadyReturn<INavigator, Boolean>() {
+			@Override
+			public Boolean invoke(INavigator object) {
+				return object.hasGpsTicked();
+			}
+		}, false);
+	}
 }

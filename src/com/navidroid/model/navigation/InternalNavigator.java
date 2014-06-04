@@ -33,12 +33,13 @@ public class InternalNavigator implements INavigator {
 	private IGps gps;
 	private Announcer announcer;
 	private IDirectionsFactory directionsFactory;
-	private INavigatorStateListener navigatorStateListener;
+	private INavigationStateListener navigationStateListener;
 	private Position position;
 	private MutableNavigationState navigationState;
 	private NavigationState navigationStateSnapshot;
 	private NavigationState lastNavigationStateSnapshot;
 	private LatLng destination;
+	private boolean hasGpsTicked;
 	
 	private final Object navigatingLock = new Object();
 	
@@ -48,6 +49,7 @@ public class InternalNavigator implements INavigator {
 		this.directionsFactory = directionsFactory;
 		this.announcer = announcer;
 		
+		hasGpsTicked = false;
 		vehicleSmoother = new VehicleSmoother(vehicle);
 		navigationState = new MutableNavigationState();
 		navigationStateSnapshot = navigationState.getSnapshot();
@@ -59,6 +61,7 @@ public class InternalNavigator implements INavigator {
 		gps.setOnTickHandler(new OnTickHandler() {
 			@Override
 			public void invoke(Position position) {
+				hasGpsTicked = true;
 				onGpsTick(position);
 			}
 		});
@@ -66,8 +69,8 @@ public class InternalNavigator implements INavigator {
 		gps.forceTick();
 	}
 	
-	public void setNavigatorStateListener(INavigatorStateListener stateListener) {
-		navigatorStateListener = stateListener;
+	public void setNavigationStateListener(INavigationStateListener stateListener) {
+		navigationStateListener = stateListener;
 	}
 
 	public void go(final LatLng location) {
@@ -85,7 +88,7 @@ public class InternalNavigator implements INavigator {
 		request.getDirections(new DirectionsRetrieved() {
 			@Override
 			public void onSuccess(Directions directions, LatLng origin, LatLng destination) {
-				navigatorStateListener.OnNewPathFound(directions, origin, destination);
+				navigationStateListener.OnNewPathFound(directions, origin, destination);
 				if (finalWasNavigating) {
 					redirectNavigation(directions, location);
 				} else {
@@ -95,7 +98,7 @@ public class InternalNavigator implements INavigator {
 			
 			@Override
 			public void onFailure(Exception e, LatLng origin, LatLng destination) {
-				navigatorStateListener.OnNewPathFoundFailed(e, origin, destination);
+				navigationStateListener.OnNewPathFoundFailed(e, origin, destination);
 			}
 		});
 	}
@@ -134,6 +137,10 @@ public class InternalNavigator implements INavigator {
 		}
 	}
 	
+	public boolean hasGpsTicked() {
+		return hasGpsTicked;
+	}
+	
 	private void beginNavigation(Directions directions, LatLng location) {
 		synchronized (navigatingLock) {
 			destination = location;
@@ -141,7 +148,7 @@ public class InternalNavigator implements INavigator {
 			map.followVehicle();
 			navigationState.startNavigation(directions);
 			announcer.startNavigation(directions);
-			navigatorStateListener.OnNavigationStarted(navigationState);
+			navigationStateListener.OnNavigationStarted(navigationState);
 			assert navigationState.isNavigating();
 			if (gps instanceof AbstractSimulatedGps) {
 				((AbstractSimulatedGps)gps).followPath(directions.getLatLngPath());
@@ -172,8 +179,8 @@ public class InternalNavigator implements INavigator {
 				checkOffPath();
 			}
 			
-			if (navigatorStateListener != null) {
-				navigatorStateListener.OnNavigatorTick(navigationState);
+			if (navigationStateListener != null) {
+				navigationStateListener.OnNavigatorTick(navigationState);
 			}
 		}
 		vehicleSmoother.update(navigationStateSnapshot);
@@ -187,7 +194,7 @@ public class InternalNavigator implements INavigator {
 				if (!navigationStateSnapshot.hasDeparted()) {
 					announcer.announceDirectionAfterDeparture(currentDirection);
 					navigationState.signalHasDeparted();
-					navigatorStateListener.OnDeparture(navigationStateSnapshot);
+					navigationStateListener.OnDeparture(navigationStateSnapshot);
 				}
 				
 				if (!navigationStateSnapshot.hasStartedFollowingDirections()) {
@@ -199,7 +206,7 @@ public class InternalNavigator implements INavigator {
 	
 	private void checkArrival() {
 		if (LatLngUtil.distanceInMeters(navigationState.getLocation(), destination) <= MIN_ARRIVAL_DIST_METERS) {	
-			navigatorStateListener.OnArrival(navigationState);
+			navigationStateListener.OnArrival(navigationState);
 			announcer.announceArrival();
 			stop();
 		}
@@ -220,7 +227,7 @@ public class InternalNavigator implements INavigator {
 				(lastNavigationStateSnapshot == null ||
 				!lastNavigationStateSnapshot.isNavigating() ||
 				navigationStateSnapshot.getCurrentDirection() != lastNavigationStateSnapshot.getCurrentDirection())) {
-			navigatorStateListener.OnNewDirection(navigationStateSnapshot);	
+			navigationStateListener.OnNewDirection(navigationStateSnapshot);	
 		}
 	}
 	
@@ -236,7 +243,7 @@ public class InternalNavigator implements INavigator {
 					navigationStateSnapshot.getTime() - navigationStateSnapshot.getHeadingOffPathStartTime() > MAX_TIME_OFF_PATH_MS) {
 					// We have been off path for the tolerance time and not yet signalled so.
 					navigationState.signalOffPath();
-					navigatorStateListener.OnVehicleOffPath(navigationState);
+					navigationStateListener.OnVehicleOffPath(navigationState);
 				}
 				
 			} else if (lastNavigationStateSnapshot != null && lastNavigationStateSnapshot.isHeadingOffPath()) { // We are back on path.
