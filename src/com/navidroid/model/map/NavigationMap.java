@@ -37,6 +37,7 @@ public class NavigationMap {
 	
 	public void setVehicle(Vehicle vehicle) {
 		this.vehicle = vehicle;
+		unfollowVehicle();
 	}
 	
 	public void addPathPolyline(List<LatLng> path) {
