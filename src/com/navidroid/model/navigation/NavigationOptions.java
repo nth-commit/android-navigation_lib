@@ -11,7 +11,6 @@ public class NavigationOptions {
 	private MapOptions mapOptions = new MapOptions();
 	private GpsOptions gpsOptions = new GpsOptions();
 	private AnnouncementOptions announcementOptions = new AnnouncementOptions();
-	private NavigationStateListenerOptions navigationStateListenerOptions = new NavigationStateListenerOptions();
 	
 	public NavigationOptions vehicleOptions(VehicleOptions options) {
 		vehicleOptions = options;
@@ -47,14 +46,5 @@ public class NavigationOptions {
 	
 	public AnnouncementOptions announcementOptions() {
 		return announcementOptions;
-	}
-	
-	public NavigationOptions navigationStateListenerOptions(NavigationStateListenerOptions options) {
-		navigationStateListenerOptions = options;
-		return this;
-	}
-	
-	public NavigationStateListenerOptions navigationStateListenerOptions() {
-		return navigationStateListenerOptions;
 	}
 }

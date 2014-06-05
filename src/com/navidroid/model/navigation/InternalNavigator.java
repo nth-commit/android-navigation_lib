@@ -11,6 +11,14 @@ import com.navidroid.model.directions.IDirectionsFactory;
 import com.navidroid.model.directions.Movement;
 import com.navidroid.model.directions.Route;
 import com.navidroid.model.directions.Route.DirectionsRetrieved;
+import com.navidroid.model.events.OnArrivalListener;
+import com.navidroid.model.events.OnDepartureListener;
+import com.navidroid.model.events.OnNavigationStartedListener;
+import com.navidroid.model.events.OnNavigatorTickListener;
+import com.navidroid.model.events.OnNewDirectionListener;
+import com.navidroid.model.events.OnNewPathFoundFailedListener;
+import com.navidroid.model.events.OnNewPathFoundListener;
+import com.navidroid.model.events.OnVehicleOffPathListener;
 import com.navidroid.model.map.NavigationMap;
 import com.navidroid.model.positioning.AbstractSimulatedGps;
 import com.navidroid.model.positioning.IGps;
@@ -33,13 +41,21 @@ public class InternalNavigator implements INavigator {
 	private IGps gps;
 	private Announcer announcer;
 	private IDirectionsFactory directionsFactory;
-	private INavigationStateListener navigationStateListener;
 	private Position position;
 	private MutableNavigationState navigationState;
 	private NavigationState navigationStateSnapshot;
 	private NavigationState lastNavigationStateSnapshot;
 	private LatLng destination;
 	private boolean hasGpsTicked;
+	
+	private OnNewPathFoundFailedListener onNewPathFoundFailedListener;
+	private OnNewPathFoundListener onNewPathFoundListener;
+	private OnNavigationStartedListener onNavigationStartedListener;
+	private OnDepartureListener onDepartureListener;
+	private OnArrivalListener onArrivalListener;
+	private OnVehicleOffPathListener onVehicleOffPathListener;
+	private OnNewDirectionListener onNewDirectionListener;	
+	private OnNavigatorTickListener onNavigatorTickListener;
 	
 	private final Object navigatingLock = new Object();
 	
@@ -68,10 +84,6 @@ public class InternalNavigator implements INavigator {
 		gps.enableTracking();
 		gps.forceTick();
 	}
-	
-	public void setNavigationStateListener(INavigationStateListener stateListener) {
-		navigationStateListener = stateListener;
-	}
 
 	public void go(final LatLng location) {
 		boolean wasNavigating = false;
@@ -80,7 +92,7 @@ public class InternalNavigator implements INavigator {
 			if (wasNavigating) {
 				stop();
 				destination = location;
-			}
+			};
 		}
 		
 		final boolean finalWasNavigating = wasNavigating;
@@ -88,7 +100,10 @@ public class InternalNavigator implements INavigator {
 		request.getDirections(new DirectionsRetrieved() {
 			@Override
 			public void onSuccess(Directions directions, LatLng origin, LatLng destination) {
-				navigationStateListener.OnNewPathFound(directions, origin, destination);
+				if (onNewPathFoundListener != null) {
+					onNewPathFoundListener.invoke(directions, origin, destination);
+				}
+				
 				if (finalWasNavigating) {
 					redirectNavigation(directions, location);
 				} else {
@@ -98,7 +113,15 @@ public class InternalNavigator implements INavigator {
 			
 			@Override
 			public void onFailure(Exception e, LatLng origin, LatLng destination) {
-				navigationStateListener.OnNewPathFoundFailed(e, origin, destination);
+				boolean shouldRetry = true;
+				
+				if (onNewPathFoundFailedListener != null) {
+					shouldRetry = onNewPathFoundFailedListener.invoke(e, origin, destination);
+				}
+				
+				if (shouldRetry) {
+					go(destination);
+				}
 			}
 		});
 	}
@@ -147,8 +170,13 @@ public class InternalNavigator implements INavigator {
 			map.addPathPolyline(directions.getLatLngPath());
 			map.followVehicle();
 			navigationState.startNavigation(directions);
+			updateNavigationStateSnapshot();
 			announcer.startNavigation(directions);
-			navigationStateListener.OnNavigationStarted(navigationState);
+			
+			if (onNavigationStartedListener != null) {
+				onNavigationStartedListener.invoke(navigationStateSnapshot);
+			}
+			
 			assert navigationState.isNavigating();
 			if (gps instanceof AbstractSimulatedGps) {
 				((AbstractSimulatedGps)gps).followPath(directions.getLatLngPath());
@@ -165,12 +193,19 @@ public class InternalNavigator implements INavigator {
 		}
 	}
 	
+	private void updateNavigationStateSnapshot() {
+		synchronized (navigatingLock) {
+			lastNavigationStateSnapshot = navigationStateSnapshot;
+			navigationStateSnapshot = navigationState.getSnapshot();
+		}
+	}
+	
 	private void onGpsTick(Position position) {
 		synchronized (navigatingLock) {
 			this.position = position;
 			navigationState.update(position);
-			lastNavigationStateSnapshot = navigationStateSnapshot;
-			navigationStateSnapshot = navigationState.getSnapshot();
+			updateNavigationStateSnapshot();
+			
 			if (isNavigating()) {
 				checkDeparted();
 				checkArrival();
@@ -179,8 +214,8 @@ public class InternalNavigator implements INavigator {
 				checkOffPath();
 			}
 			
-			if (navigationStateListener != null) {
-				navigationStateListener.OnNavigatorTick(navigationState);
+			if (onNavigatorTickListener != null) {
+				onNavigatorTickListener.invoke(navigationStateSnapshot);
 			}
 		}
 		vehicleSmoother.update(navigationStateSnapshot);
@@ -194,7 +229,10 @@ public class InternalNavigator implements INavigator {
 				if (!navigationStateSnapshot.hasDeparted()) {
 					announcer.announceDirectionAfterDeparture(currentDirection);
 					navigationState.signalHasDeparted();
-					navigationStateListener.OnDeparture(navigationStateSnapshot);
+					
+					if (onDepartureListener != null) {
+						onDepartureListener.invoke(navigationStateSnapshot);
+					}
 				}
 				
 				if (!navigationStateSnapshot.hasStartedFollowingDirections()) {
@@ -206,7 +244,9 @@ public class InternalNavigator implements INavigator {
 	
 	private void checkArrival() {
 		if (LatLngUtil.distanceInMeters(navigationState.getLocation(), destination) <= MIN_ARRIVAL_DIST_METERS) {	
-			navigationStateListener.OnArrival(navigationState);
+			if (onArrivalListener != null) {
+				onArrivalListener.invoke(navigationStateSnapshot);
+			}
 			announcer.announceArrival();
 			stop();
 		}
@@ -226,8 +266,9 @@ public class InternalNavigator implements INavigator {
 		if (navigationStateSnapshot.isNavigating() &&
 				(lastNavigationStateSnapshot == null ||
 				!lastNavigationStateSnapshot.isNavigating() ||
-				navigationStateSnapshot.getCurrentDirection() != lastNavigationStateSnapshot.getCurrentDirection())) {
-			navigationStateListener.OnNewDirection(navigationStateSnapshot);	
+				navigationStateSnapshot.getCurrentDirection() != lastNavigationStateSnapshot.getCurrentDirection()) &&
+				onNewDirectionListener != null) {
+			onNewDirectionListener.invoke(navigationStateSnapshot);
 		}
 	}
 	
@@ -243,12 +284,61 @@ public class InternalNavigator implements INavigator {
 					navigationStateSnapshot.getTime() - navigationStateSnapshot.getHeadingOffPathStartTime() > MAX_TIME_OFF_PATH_MS) {
 					// We have been off path for the tolerance time and not yet signalled so.
 					navigationState.signalOffPath();
-					navigationStateListener.OnVehicleOffPath(navigationState);
+					
+					boolean shouldFindNewRoute = true;
+					
+					if (onVehicleOffPathListener != null) {
+						shouldFindNewRoute = onVehicleOffPathListener.invoke(navigationStateSnapshot);
+					}
+					
+					if (shouldFindNewRoute) {
+						reroute();
+					}
 				}
 				
 			} else if (lastNavigationStateSnapshot != null && lastNavigationStateSnapshot.isHeadingOffPath()) { // We are back on path.
 				navigationState.signalOnPath();
 			}
 		}
+	}
+
+	@Override
+	public void setOnNewPathFoundFailedListener(OnNewPathFoundFailedListener listener) {
+		onNewPathFoundFailedListener = listener;
+	}
+
+	@Override
+	public void setOnNewPathFoundListener(OnNewPathFoundListener listener) {
+		onNewPathFoundListener = listener;
+	}
+
+	@Override
+	public void setOnNavigationStartedListener(OnNavigationStartedListener listener) {
+		onNavigationStartedListener = listener;		
+	}
+
+	@Override
+	public void setOnDepartureListener(OnDepartureListener listener) {
+		onDepartureListener = listener;
+	}
+
+	@Override
+	public void setOnArrivalListener(OnArrivalListener listener) {
+		onArrivalListener = listener;
+	}
+
+	@Override
+	public void setOnVehicleOffPathListener(OnVehicleOffPathListener listener) {
+		onVehicleOffPathListener = listener;
+	}
+
+	@Override
+	public void setOnNewDirectionListener(OnNewDirectionListener listener) {
+		onNewDirectionListener = listener;
+	}
+
+	@Override
+	public void setOnNavigatorTickListener(OnNavigatorTickListener listener) {
+		onNavigatorTickListener = listener;
 	}
 }

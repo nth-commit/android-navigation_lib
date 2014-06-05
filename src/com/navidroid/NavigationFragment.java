@@ -13,12 +13,9 @@ import com.navidroid.model.directions.IDirectionsFactory;
 import com.navidroid.model.map.IMap;
 import com.navidroid.model.map.IMapFactory;
 import com.navidroid.model.map.NavigationMap;
-import com.navidroid.model.navigation.INavigationStateListener;
 import com.navidroid.model.navigation.InternalNavigator;
 import com.navidroid.model.navigation.NavigationOptions;
 import com.navidroid.model.navigation.Navigator;
-import com.navidroid.model.navigation.NavigationStateListenerOptions;
-import com.navidroid.model.navigation.NavigationStateListenerOptions.OnNavigationStateListenerCreation;
 import com.navidroid.model.positioning.GpsFactory;
 import com.navidroid.model.positioning.IGps;
 import com.navidroid.model.positioning.GpsOptions.GpsType;
@@ -160,13 +157,6 @@ public class NavigationFragment extends Fragment implements
 	private void createNavigator() {
 		vehicle = new Vehicle(this, vehicleMarkerFactory, navigationMap, options.vehicleOptions().location(gps.getLastLocation()));
 		internalNavigator = new InternalNavigator(this, gps, navigationMap, vehicle, directionsFactory, announcer);
-		NavigationStateListenerOptions navStateOptions = options.navigationStateListenerOptions();
-		INavigationStateListener listener = navStateOptions.navigationStateListenerFactory().createNavigationStateListener(this);
-		internalNavigator.setNavigationStateListener(listener);
-		OnNavigationStateListenerCreation onNavigatorStateListenerCreated = navStateOptions.onNavigationStateListenerCreation();
-		if (onNavigatorStateListenerCreated != null) {
-			onNavigatorStateListenerCreated.invoke(listener);
-		}
 		navigator.setInnerObject(internalNavigator);
 	}
 }

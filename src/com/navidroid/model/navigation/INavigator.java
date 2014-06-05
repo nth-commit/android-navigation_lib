@@ -1,21 +1,44 @@
 package com.navidroid.model.navigation;
 
 import com.navidroid.model.LatLng;
+import com.navidroid.model.events.OnArrivalListener;
+import com.navidroid.model.events.OnDepartureListener;
+import com.navidroid.model.events.OnNavigationStartedListener;
+import com.navidroid.model.events.OnNavigatorTickListener;
+import com.navidroid.model.events.OnNewDirectionListener;
+import com.navidroid.model.events.OnNewPathFoundFailedListener;
+import com.navidroid.model.events.OnNewPathFoundListener;
+import com.navidroid.model.events.OnVehicleOffPathListener;
 
 public interface INavigator {
 	
-	void go(LatLng location);
+	public void go(LatLng location);
 	
-	void stop();
+	public void stop();
 	
-	void reroute();
+	public void reroute();
 	
-	boolean isNavigating();
+	public boolean isNavigating();
 	
-	LatLng getDestination();
+	public LatLng getDestination();
 	
-	LatLng getLocation();
+	public LatLng getLocation();
 	
-	boolean hasGpsTicked();
+	public boolean hasGpsTicked();
+
+	public void setOnNewPathFoundFailedListener(OnNewPathFoundFailedListener listener);
 	
+	public void setOnNewPathFoundListener(OnNewPathFoundListener listener);
+	
+	public void setOnNavigationStartedListener(OnNavigationStartedListener listener);
+	
+	public void setOnDepartureListener(OnDepartureListener listener);
+	
+	public void setOnArrivalListener(OnArrivalListener listener);
+	
+	public void setOnVehicleOffPathListener(OnVehicleOffPathListener listener);
+	
+	public void setOnNewDirectionListener(OnNewDirectionListener listener);
+	
+	public void setOnNavigatorTickListener(OnNavigatorTickListener listener);	
 }
