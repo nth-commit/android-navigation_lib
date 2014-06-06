@@ -82,6 +82,18 @@ public class Direction {
 			case TURN_LEFT:
 				movementDescription = "turn left";
 				break;
+			case SLIGHT_RIGHT:
+				movementDescription = "slight right";
+				break;
+			case SLIGHT_LEFT:
+				movementDescription = "slight left";
+				break;
+			case SHARP_RIGHT:
+				movementDescription = "sharp right";
+				break;
+			case SHARP_LEFT:
+				movementDescription = "slight right";
+				break;
 			case CONTINUE:
 				movementDescription = description;
 				break;

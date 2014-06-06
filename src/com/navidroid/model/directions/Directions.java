@@ -11,21 +11,21 @@ public class Directions {
 	
 	private final static int MIN_DIST_FOR_BEARING_METERS = 5;
 	
-	private final static int CONTINUE_ANGLE_RANGE = 20;
+	private final static int CONTINUE_ANGLE_RANGE = 10;
 	private final static int MIN_CONTINUE_LEFT_ANGLE = 360 - CONTINUE_ANGLE_RANGE / 2;
 	private final static int MAX_CONTINUE_RIGHT_ANGLE = CONTINUE_ANGLE_RANGE / 2;
 	
-	private final static int VEER_ANGLE_RANGE = 60;
-	private final static int MIN_VEER_LEFT_ANGLE = 360 - VEER_ANGLE_RANGE / 2;
-	private final static int MAX_VEER_RIGHT_ANGLE = VEER_ANGLE_RANGE / 2;
+	private final static int SLIGHT_ANGLE_RANGE = 60;
+	private final static int MIN_SLIGHT_LEFT_ANGLE = 360 - SLIGHT_ANGLE_RANGE / 2;
+	private final static int MAX_SLIGHT_RIGHT_ANGLE = SLIGHT_ANGLE_RANGE / 2;
 	
 	private final static int TURN_ANGLE_RANGE = 225;
 	private final static int MIN_TURN_LEFT_ANGLE = 360 - TURN_ANGLE_RANGE / 2;
 	private final static int MAX_TURN_RIGHT_ANGLE = TURN_ANGLE_RANGE / 2;
 	
 	private final static int TURN_SHARP_ANGLE_RANGE = 340;
-	private final static int MIN_TURN_LEFT_SHARP_ANGLE = 360 - TURN_SHARP_ANGLE_RANGE / 2;
-	private final static int MAX_TURN_RIGHT_SHARP_ANGLE = TURN_SHARP_ANGLE_RANGE / 2;
+	private final static int MIN_SHARP_LEFT_ANGLE = 360 - TURN_SHARP_ANGLE_RANGE / 2;
+	private final static int MAX_SHARP_RIGHT_ANGLE = TURN_SHARP_ANGLE_RANGE / 2;
 	
 	private List<Direction> directions;
 	private ArrayList<Point> path;
@@ -161,20 +161,20 @@ public class Directions {
 		assert movementAngle <= 360 && movementAngle >= 0;
 		if (movementAngle > MIN_CONTINUE_LEFT_ANGLE) {
 			return Movement.CONTINUE;
-		} else if (movementAngle > MIN_VEER_LEFT_ANGLE) {
-			return Movement.VEER_LEFT;
+		} else if (movementAngle > MIN_SLIGHT_LEFT_ANGLE) {
+			return Movement.SLIGHT_LEFT;
 		} else if (movementAngle > MIN_TURN_LEFT_ANGLE) {
 			return Movement.TURN_LEFT;
-		} else if (movementAngle > MIN_TURN_LEFT_SHARP_ANGLE) {
-			return Movement.TURN_LEFT_SHARP;
-		} else if (movementAngle > MAX_TURN_RIGHT_SHARP_ANGLE) {
+		} else if (movementAngle > MIN_SHARP_LEFT_ANGLE) {
+			return Movement.SHARP_LEFT;
+		} else if (movementAngle > MAX_SHARP_RIGHT_ANGLE) {
 			return Movement.U_TURN;
 		} else if (movementAngle > MAX_TURN_RIGHT_ANGLE) {
-			return Movement.TURN_RIGHT_SHARP;
-		} else if (movementAngle > MAX_VEER_RIGHT_ANGLE) {
+			return Movement.SHARP_RIGHT;
+		} else if (movementAngle > MAX_SLIGHT_RIGHT_ANGLE) {
 			return Movement.TURN_RIGHT;
 		} else if (movementAngle > MAX_CONTINUE_RIGHT_ANGLE) {
-			return Movement.VEER_RIGHT;
+			return Movement.SLIGHT_RIGHT;
 		} else {
 			return Movement.CONTINUE;
 		}
