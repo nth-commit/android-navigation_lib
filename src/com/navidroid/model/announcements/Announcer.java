@@ -107,6 +107,13 @@ public class Announcer {
 		}
 	}
 	
+	public void onDestroy() {
+		if (tts != null) {
+			tts.stop();
+			tts.shutdown();
+		}
+	}
+	
 	private AnnouncementGroup getAnnouncementGroup(Direction direction) {
 		return announcementGroups.get(direction);
 	}

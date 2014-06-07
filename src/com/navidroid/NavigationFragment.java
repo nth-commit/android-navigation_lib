@@ -146,6 +146,12 @@ public class NavigationFragment extends Fragment implements
 		// TODO Auto-generated method stub
 	}
 	
+	@Override
+	public void onDestroy() {
+		announcer.onDestroy();
+		super.onDestroy();
+	}
+	
 	public Navigator getNavigator() {
 		return navigator;
 	}
