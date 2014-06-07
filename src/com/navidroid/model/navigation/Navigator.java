@@ -22,6 +22,16 @@ public class Navigator extends WhenReadyWrapper<INavigator> implements INavigato
 			}
 		});
 	}
+	
+	@Override
+	public void go(final String address) {
+		whenReady(new WhenReady<INavigator>() {
+			@Override
+			public void invoke(INavigator object) {
+				object.go(address);
+			}
+		});
+	}
 
 	@Override
 	public void stop() {

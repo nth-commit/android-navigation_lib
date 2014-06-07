@@ -14,6 +14,8 @@ public interface INavigator {
 	
 	public void go(LatLng location);
 	
+	public void go(String address);
+	
 	public void stop();
 	
 	public void reroute();

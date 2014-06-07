@@ -2,7 +2,7 @@ package com.navidroid.model.vehicle;
 
 import android.graphics.Bitmap;
 
-import com.navidroid.Defaults;
+import com.navidroid.model.Defaults;
 import com.navidroid.model.LatLng;
 import com.navidroid.model.PointD;
 

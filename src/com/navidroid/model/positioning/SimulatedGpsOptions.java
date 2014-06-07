@@ -2,7 +2,7 @@ package com.navidroid.model.positioning;
 
 import java.util.List;
 
-import com.navidroid.Defaults;
+import com.navidroid.model.Defaults;
 import com.navidroid.model.LatLng;
 
 public class SimulatedGpsOptions {

@@ -47,7 +47,6 @@ public class InternalNavigator implements INavigator {
 	private MutableNavigationState navigationState;
 	private NavigationState navigationStateSnapshot;
 	private NavigationState lastNavigationStateSnapshot;
-	private LatLng destination;
 	private boolean hasGpsTicked;
 	
 	private OnNewPathFoundFailedListener onNewPathFoundFailedListener;
@@ -86,29 +85,47 @@ public class InternalNavigator implements INavigator {
 		gps.enableTracking();
 		gps.forceTick();
 	}
-
-	public void go(final LatLng location) {
+	
+	public void go(final LatLng destination) {
+		go(new GetRoute() {
+			@Override
+			public Route get(LatLng rerouteWaypoint) {
+				return new Route(position.location, destination, rerouteWaypoint, directionsFactory);
+			}
+		});
+	}
+	
+	public void go(final String destinationAddress) {
+		go(new GetRoute() {
+			@Override
+			public Route get(LatLng rerouteWaypoint) {
+				return new Route(position.location, destinationAddress, rerouteWaypoint, directionsFactory);
+			}
+		});
+	}
+	
+	public void go(GetRoute getRoute) {
 		boolean wasNavigating = false;
 		LatLng rerouteWaypoint = null;
 				
 		synchronized (navigatingLock) {
 			wasNavigating = isNavigating();
 			if (wasNavigating) {
-				rerouteWaypoint = getRerouteWayPoint();
+				rerouteWaypoint = getRerouteWaypoint();
 				stop();
-				destination = location;
 			};
 		}
 		
 		final boolean finalWasNavigating = wasNavigating;
-		Route request = new Route(position.location, location, rerouteWaypoint, directionsFactory);		
-		request.getDirections(new DirectionsRetrieved() {
+		Route route = getRoute.get(rerouteWaypoint);
+		route.getDirections(new DirectionsRetrieved() {
 			@Override
-			public void onSuccess(Directions directions, LatLng origin, LatLng destination) {
+			public void onSuccess(Directions directions) {
 				if (onNewPathFoundListener != null) {
-					onNewPathFoundListener.invoke(directions, origin, destination);
+					onNewPathFoundListener.invoke(directions);
 				}
 				
+				LatLng location = directions.getDestination();
 				if (finalWasNavigating) {
 					redirectNavigation(directions, location);
 				} else {
@@ -117,23 +134,32 @@ public class InternalNavigator implements INavigator {
 			}
 			
 			@Override
-			public void onFailure(Exception e, LatLng origin, LatLng destination) {
-				boolean shouldRetry = true;
+			public void onFailure(Exception e, LatLng destination, String destinationAddress) {
+				boolean shouldRetry = false;
 				
 				if (onNewPathFoundFailedListener != null) {
-					shouldRetry = onNewPathFoundFailedListener.invoke(e, origin, destination);
+					shouldRetry = destination == null ?
+						onNewPathFoundFailedListener.invoke(e, destinationAddress) :
+						onNewPathFoundFailedListener.invoke(e, destination);
 				}
 				
 				if (shouldRetry) {
-					go(destination);
+					if (destination == null) {
+						go(destinationAddress);
+					} else {
+						go(destination);
+					}
 				}
 			}
 		});
 	}
 	
+	private interface GetRoute {
+		Route get(LatLng rerouteWaypoint);
+	}
+	
 	public void stop() {
 		synchronized (navigatingLock) {
-			destination = null;
 			navigationState.endNavigation();
 			map.removePolylinePath();
 		}
@@ -141,6 +167,7 @@ public class InternalNavigator implements INavigator {
 	
 	public void reroute() {
 		synchronized (navigatingLock) {
+			LatLng destination = navigationStateSnapshot.getDestination();
 			if (destination != null) {
 				go(destination);
 			}
@@ -155,7 +182,7 @@ public class InternalNavigator implements INavigator {
 	
 	public LatLng getDestination() {
 		synchronized (navigatingLock) {
-			return destination;
+			return navigationStateSnapshot.getDestination();
 		}
 	}
 	
@@ -169,22 +196,21 @@ public class InternalNavigator implements INavigator {
 		return hasGpsTicked;
 	}
 	
-	private LatLng getRerouteWayPoint() {
-		Point wayPoint = navigationStateSnapshot.getCurrentPoint();
-		Point currentPoint = wayPoint;
+	private LatLng getRerouteWaypoint() {
+		Point waypoint = navigationStateSnapshot.getCurrentPoint();
+		Point currentPoint = waypoint;
 		int distanceAhead = 0;
 		while (distanceAhead < GRACE_DISTANCE_TO_REROUTE_M &&
 				(currentPoint = currentPoint.next) != null &&
 				currentPoint.direction.getMovement() != Movement.ARRIVAL) {
 			distanceAhead += currentPoint.prev.distanceToNextPointMeters;
-			wayPoint = currentPoint;
+			waypoint = currentPoint;
 		}
-		return wayPoint.location;
+		return waypoint.location;
 	}
 	
 	private void beginNavigation(Directions directions, LatLng location) {
 		synchronized (navigatingLock) {
-			destination = location;
 			map.addPathPolyline(directions.getLatLngPath());
 			map.followVehicle();
 			navigationState.startNavigation(directions);
@@ -206,7 +232,6 @@ public class InternalNavigator implements INavigator {
 		synchronized (navigatingLock) {
 			navigationState.redirectNavigation(directions);
 			announcer.startNavigation(directions);
-			destination = location;
 			map.addPathPolyline(directions.getLatLngPath());
 		}
 	}
@@ -261,7 +286,7 @@ public class InternalNavigator implements INavigator {
 	}
 	
 	private void checkArrival() {
-		if (LatLngUtil.distanceInMeters(navigationState.getLocation(), destination) <= MIN_ARRIVAL_DIST_METERS) {	
+		if (LatLngUtil.distanceInMeters(navigationStateSnapshot.getLocation(), navigationStateSnapshot.getDestination()) <= MIN_ARRIVAL_DIST_METERS) {	
 			if (onArrivalListener != null) {
 				onArrivalListener.invoke(navigationStateSnapshot);
 			}

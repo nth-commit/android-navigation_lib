@@ -1,6 +1,6 @@
 package com.navidroid.model.map;
 
-import com.navidroid.Defaults;
+import com.navidroid.model.Defaults;
 import com.navidroid.model.LatLng;
 
 public class MapOptions {

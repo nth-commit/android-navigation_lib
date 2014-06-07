@@ -31,6 +31,7 @@ public class MutableNavigationState extends NavigationState {
 	
 	public void redirectNavigation(Directions directions) {
 		this.directions = directions;
+		destination = directions.getDestination();
 		path = directions.getPath();
 		currentPoint = path.get(0);
 		isHeadingOffPath = false;
@@ -39,6 +40,7 @@ public class MutableNavigationState extends NavigationState {
 	}
 	
 	public void endNavigation() {
+		destination = null;
 		path = null;
 		currentPoint = null;
 		locationOnPath = null;

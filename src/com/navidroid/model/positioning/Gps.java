@@ -5,7 +5,7 @@ import android.location.Location;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.navidroid.Defaults;
+import com.navidroid.model.Defaults;
 import com.navidroid.model.LatLng;
 import com.navidroid.model.util.LatLngUtil;
 

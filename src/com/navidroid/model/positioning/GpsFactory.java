@@ -1,7 +1,7 @@
 package com.navidroid.model.positioning;
 
 import com.google.android.gms.location.LocationClient;
-import com.navidroid.Defaults;
+import com.navidroid.model.Defaults;
 import com.navidroid.model.positioning.GpsOptions.GpsType;
 
 public class GpsFactory {

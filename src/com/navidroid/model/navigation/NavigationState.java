@@ -12,6 +12,7 @@ public class NavigationState {
 	
 	protected List<Point> path;
 	protected Directions directions;
+	protected LatLng destination;
 	protected Position position;
 	protected LatLng locationOnPath;
 	protected double bearingOnPath;
@@ -32,6 +33,7 @@ public class NavigationState {
 	protected NavigationState(NavigationState navigationStateSnapshot) {
 		this.path = navigationStateSnapshot.path;
 		this.directions = navigationStateSnapshot.directions;
+		this.destination = navigationStateSnapshot.destination;
 		this.position = navigationStateSnapshot.position;
 		this.locationOnPath = navigationStateSnapshot.locationOnPath;
 		this.bearingOnPath = navigationStateSnapshot.bearingOnPath;
@@ -46,6 +48,10 @@ public class NavigationState {
 		this.hasDeparted = navigationStateSnapshot.hasDeparted;
 		this.hasStartedFollowingDirections = navigationStateSnapshot.hasStartedFollowingDirections;
 		this.hasArrived = navigationStateSnapshot.hasArrived;
+	}
+	
+	public LatLng getDestination() {
+		return destination;
 	}
 	
 	public Point getCurrentPoint() {
