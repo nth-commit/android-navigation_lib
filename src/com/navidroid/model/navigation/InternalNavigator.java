@@ -9,6 +9,7 @@ import com.navidroid.model.directions.Direction;
 import com.navidroid.model.directions.Directions;
 import com.navidroid.model.directions.IDirectionsFactory;
 import com.navidroid.model.directions.Movement;
+import com.navidroid.model.directions.Point;
 import com.navidroid.model.directions.Route;
 import com.navidroid.model.directions.Route.DirectionsRetrieved;
 import com.navidroid.model.events.OnArrivalListener;
@@ -35,6 +36,7 @@ public class InternalNavigator implements INavigator {
 	private final int OFF_PATH_TOLERANCE_METERS = 10;
 	private final int OFF_PATH_TOLERANCE_BEARING = 45;
 	private final int MAX_TIME_OFF_PATH_MS = 3000;
+	private final int GRACE_DISTANCE_TO_REROUTE_M = 50;
 	
 	private NavigationMap map;
 	private VehicleSmoother vehicleSmoother;
@@ -87,16 +89,19 @@ public class InternalNavigator implements INavigator {
 
 	public void go(final LatLng location) {
 		boolean wasNavigating = false;
+		LatLng rerouteWaypoint = null;
+				
 		synchronized (navigatingLock) {
 			wasNavigating = isNavigating();
 			if (wasNavigating) {
+				rerouteWaypoint = getRerouteWayPoint();
 				stop();
 				destination = location;
 			};
 		}
 		
 		final boolean finalWasNavigating = wasNavigating;
-		Route request = new Route(position.location, location, directionsFactory);
+		Route request = new Route(position.location, location, rerouteWaypoint, directionsFactory);		
 		request.getDirections(new DirectionsRetrieved() {
 			@Override
 			public void onSuccess(Directions directions, LatLng origin, LatLng destination) {
@@ -162,6 +167,19 @@ public class InternalNavigator implements INavigator {
 	
 	public boolean hasGpsTicked() {
 		return hasGpsTicked;
+	}
+	
+	private LatLng getRerouteWayPoint() {
+		Point wayPoint = navigationStateSnapshot.getCurrentPoint();
+		Point currentPoint = wayPoint;
+		int distanceAhead = 0;
+		while (distanceAhead < GRACE_DISTANCE_TO_REROUTE_M &&
+				(currentPoint = currentPoint.next) != null &&
+				currentPoint.direction.getMovement() != Movement.ARRIVAL) {
+			distanceAhead += currentPoint.prev.distanceToNextPointMeters;
+			wayPoint = currentPoint;
+		}
+		return wayPoint.location;
 	}
 	
 	private void beginNavigation(Directions directions, LatLng location) {

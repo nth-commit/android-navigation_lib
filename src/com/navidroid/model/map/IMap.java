@@ -29,7 +29,7 @@ public interface IMap {
 	
 	public void setAnchor(PointD anchor);
 
-	public void setOnTouchListener(OnTouchListener handler);
+	public void setOnTouchListener(OnTouchListener listener);
 	
 	public void setOnUpdateHandler(OnUpdateHandler handler);
 	

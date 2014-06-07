@@ -22,13 +22,15 @@ public class Route extends AsyncTask<Void, Void, String> {
 	
 	private LatLng origin;
 	private LatLng destination;
+	private LatLng rerouteWaypoint;
 	private DirectionsRetrieved directionsRetrieved;
 	private IDirectionsFactory directionsFactory;
 
-	public Route(LatLng origin, LatLng destination, IDirectionsFactory directionsFactory) {
+	public Route(LatLng origin, LatLng destination, LatLng rerouteWaypoint, IDirectionsFactory directionsFactory) {
 		this.directionsFactory = directionsFactory;
 		this.origin = origin;
-		this.destination = destination;		
+		this.destination = destination;
+		this.rerouteWaypoint = rerouteWaypoint;
 	}
 	
 	public void getDirections(DirectionsRetrieved directionsRetrieved) {
@@ -40,7 +42,7 @@ public class Route extends AsyncTask<Void, Void, String> {
 	protected String doInBackground(Void... arg0) {
 		try {
 			HttpClient http = new DefaultHttpClient();
-			String url = directionsFactory.createRequestUrl(origin, destination);
+			String url = directionsFactory.createRequestUrl(origin, destination, rerouteWaypoint);
 			HttpResponse response = http.execute(new HttpGet(url));
 			HttpEntity entity = response.getEntity();
 			return EntityUtils.toString(entity);
