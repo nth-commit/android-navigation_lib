@@ -13,7 +13,7 @@ import com.navidroid.R;
 import com.navidroid.model.PointD;
 import com.navidroid.model.map.IMap;
 import com.navidroid.model.map.NavigationMap;
-import com.navidroid.model.map.IMap.OnUpdate;
+import com.navidroid.model.map.IMap.OnUpdateHandler;
 import com.navidroid.model.util.LayoutUtil;
 
 public class StaticVehicleMarker {
@@ -35,7 +35,7 @@ public class StaticVehicleMarker {
 		image = vehicle.getImage();
 		isVisible = markerImageView.getVisibility() == View.VISIBLE;
 		
-		map.setOnUpdateEventHandler(new OnUpdate() {
+		map.setOnUpdateHandler(new OnUpdateHandler() {
 			@Override
 			public void invoke() {
 				setLayoutParams(map.getTilt());

@@ -7,15 +7,15 @@ import com.navidroid.model.PointD;
 
 public interface IMap {
 	
-	public interface OnTouchEventHandler {
+	public interface OnTouchListener {
 		void invoke();
 	}
 	
-	public interface OnUpdate {
+	public interface OnUpdateHandler {
 		void invoke();
 	}
 	
-	public interface OnInvalidationAnimationFinished {
+	public interface OnInvalidationAnimationFinishedCallback {
 		void invoke();
 	}
 	
@@ -29,9 +29,9 @@ public interface IMap {
 	
 	public void setAnchor(PointD anchor);
 
-	public void setOnTouchEventHandler(OnTouchEventHandler handler);
+	public void setOnTouchListener(OnTouchListener handler);
 	
-	public void setOnUpdateEventHandler(OnUpdate handler);
+	public void setOnUpdateHandler(OnUpdateHandler handler);
 	
 	public LatLng getLocation();
 	
@@ -49,7 +49,7 @@ public interface IMap {
 	
 	public void invalidate(int animationTime);
 	
-	public void invalidate(int animationTime, OnInvalidationAnimationFinished invalidationAnimationFinished);
+	public void invalidate(int animationTime, OnInvalidationAnimationFinishedCallback callback);
 	
 	public void addPolyline(PolylineOptions options);
 	

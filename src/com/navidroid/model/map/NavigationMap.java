@@ -3,8 +3,8 @@ package com.navidroid.model.map;
 import java.util.List;
 
 import com.navidroid.model.LatLng;
-import com.navidroid.model.map.IMap.OnInvalidationAnimationFinished;
-import com.navidroid.model.map.IMap.OnTouchEventHandler;
+import com.navidroid.model.map.IMap.OnInvalidationAnimationFinishedCallback;
+import com.navidroid.model.map.IMap.OnTouchListener;
 import com.navidroid.model.vehicle.Vehicle;
 
 public class NavigationMap {
@@ -23,7 +23,7 @@ public class NavigationMap {
 		vehicleLocation = options.location();
 		this.map = map;
 		
-		map.setOnTouchEventHandler(new OnTouchEventHandler() {
+		map.setOnTouchListener(new OnTouchListener() {
 			@Override
 			public void invoke() {
 				unfollowVehicle();
@@ -58,7 +58,7 @@ public class NavigationMap {
 		map.setZoom(NAVIGATING_ZOOM);
 		map.setTilt(NAVIGATING_TILT);
 		map.setBearing(vehicleBearing);
-		map.invalidate(FOLLOW_VEHICLE_ANIMATION_TIME, new OnInvalidationAnimationFinished() {
+		map.invalidate(FOLLOW_VEHICLE_ANIMATION_TIME, new OnInvalidationAnimationFinishedCallback() {
 			@Override
 			public void invoke() {
 				vehicle.signalFollowing();
